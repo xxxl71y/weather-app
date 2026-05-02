@@ -1,24 +1,30 @@
 # 天气酱
 
-> 一款精美、免费的实时天气应用，自动定位，动态主题。
+> 打开即知阴晴雨雪，精致到每一帧。
 
 [在线体验](https://xxxl71y.github.io/weather-app/) · [下载 Android](https://github.com/xxxl71y/weather-app/releases)
 
-## 亮点
+---
 
-- **自动定位** — 打开即显示当地天气，无需手动搜索
-- **动态主题** — 晴、云、雨、雪、雷、雾，六种沉浸式背景 + 粒子动画
-- **后台通知** — 未来1小时雨雪预警 + 早8点/晚11点定时推送
-- **完全免费** — 无广告、无注册、无 API Key
-- **多端可用** — 浏览器直接打开 / Android APK
+### ✨ 为什么选择天气酱
 
-## 下载
+| | |
+|---|---|
+| 🎯 **秒开即用** | 自动 GPS 定位，无需搜索，无需注册 |
+| 🎨 **6 种动态主题** | 晴☀️ 云⛅ 雨🌧️ 雪❄️ 雷⛈️ 雾🌫️，天气即所见 |
+| ✨ **粒子动画** | 雨滴滑落、雪花飘舞，实时渲染在屏幕上 |
+| 🔔 **智能推送** | 雨雪前1小时预警 · 早8点出门提醒 · 晚11点明日预告 |
+| 💯 **永久免费** | 无广告、无内购、无 API Key、不收集隐私 |
+| 📱 **全平台** | 浏览器即开即用 · Android APK 独立安装 |
 
-| 平台 | 说明 |
-|------|------|
-| Android | [APK 安装包](https://github.com/xxxl71y/weather-app/releases)，独立应用，冷启动即开 |
+---
 
-## 技术
+### 📦 下载
 
-基于 [Open-Meteo](https://open-meteo.com/) 免费天气 API，无需密钥。
-Android 端为 WebView 封装，支持 PWA 安装与离线缓存。
+[**Android APK**](https://github.com/xxxl71y/weather-app/releases) — 独立应用，冷启动即开，后台常驻通知
+
+---
+
+### 🛠 技术
+
+基于 [Open-Meteo](https://open-meteo.com/) 免费天气 API，Android WebView 封装，PWA 离线可用。
