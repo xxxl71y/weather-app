@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Release
 
 on:
   release:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  android:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,20 +29,49 @@ jobs:
         with:
           gradle-version: '8.5'
 
-      - name: Build debug APK
+      - name: Build APK
         working-directory: android
         run: gradle assembleDebug
+
+      - name: Rename APK
+        run: mv android/app/build/outputs/apk/debug/app-debug.apk WeatherNow-Android.apk
 
       - name: Upload to Release
         if: github.event_name == 'release'
         run: |
           gh release upload ${{ github.event.release.tag_name }} \
-            android/app/build/outputs/apk/debug/app-debug.apk \
-            --repo ${{ github.repository }}
+            WeatherNow-Android.apk --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ github.token }}
 
       - uses: actions/upload-artifact@v4
         with:
-          name: weather-now-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: WeatherNow-Android
+          path: WeatherNow-Android.apk
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y --no-progress
+
+      - name: Compile installer
+        run: ISCC.exe setup.iss
+
+      - name: Rename EXE
+        run: mv WeatherNow-Setup.exe WeatherNow-Windows.exe
+
+      - name: Upload to Release
+        if: github.event_name == 'release'
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} \
+            WeatherNow-Windows.exe --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: WeatherNow-Windows
+          path: WeatherNow-Windows.exe
