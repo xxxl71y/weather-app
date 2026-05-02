@@ -38,9 +38,7 @@ jobs:
 
       - name: Upload to Release
         if: github.event_name == 'release'
-        run: |
-          gh release upload ${{ github.event.release.tag_name }} \
-            WeatherNow-Android.apk --repo ${{ github.repository }}
+        run: gh release upload ${{ github.event.release.tag_name }} WeatherNow-Android.apk --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -61,13 +59,11 @@ jobs:
         run: ISCC.exe setup.iss
 
       - name: Rename EXE
-        run: mv WeatherNow-Setup.exe WeatherNow-Windows.exe
+        run: ren WeatherNow-Setup.exe WeatherNow-Windows.exe
 
       - name: Upload to Release
         if: github.event_name == 'release'
-        run: |
-          gh release upload ${{ github.event.release.tag_name }} \
-            WeatherNow-Windows.exe --repo ${{ github.repository }}
+        run: gh release upload ${{ github.event.release.tag_name }} WeatherNow-Windows.exe --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ github.token }}
 
