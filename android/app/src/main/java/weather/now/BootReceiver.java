@@ -3,6 +3,7 @@ package weather.now;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
@@ -21,7 +22,7 @@ public class BootReceiver extends BroadcastReceiver {
                 30, TimeUnit.MINUTES)
             .build();
         WorkManager.getInstance(ctx).enqueueUniquePeriodicWork(
-            "hourly_check", ExistingWorkPolicy.KEEP, hourly);
+            "hourly_check", ExistingPeriodicWorkPolicy.KEEP, hourly);
 
         DailyAlertWorker.scheduleNext(ctx, "today");
         DailyAlertWorker.scheduleNext(ctx, "tomorrow");
