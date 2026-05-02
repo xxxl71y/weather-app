@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="天气">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
 <title>天气查询</title>
 <style>
   :root {
@@ -411,6 +416,11 @@ async function fetchWeather() {
 }
 
 fetchWeather();
+
+// PWA: 注册 Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
 </script>
 </body>
 </html>

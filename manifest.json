@@ -1,0 +1,18 @@
+{
+  "short_name": "天气",
+  "name": "Weather Now",
+  "description": "实时天气查询",
+  "start_url": "/weather-app/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
