@@ -3,3 +3,7 @@ WeatherNow-Setup.exe
 WeatherNow-Windows.exe
 WeatherNow-Android.apk
 WeatherNow-Windows.zip
+dist/
+build/
+Weather.spec
+Weather.exe
