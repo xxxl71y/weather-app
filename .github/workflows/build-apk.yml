@@ -29,15 +29,31 @@ jobs:
         with:
           gradle-version: '8.5'
 
-      - name: Build release APK
+      - name: Build debug APK
         working-directory: android
-        run: gradle assembleRelease
+        run: gradle assembleDebug
+
+      - name: Sign APK
+        working-directory: android
+        run: |
+          keytool -genkey -v -keystore weather.keystore -alias weather \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass android123 -keypass android123 \
+            -dname "CN=Weather, OU=App, O=WeatherNow, L=Beijing, ST=Beijing, C=CN" \
+            -noprompt
+          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
+            -keystore weather.keystore \
+            -storepass android123 -keypass android123 \
+            app/build/outputs/apk/debug/app-debug.apk weather
+          $ANDROID_HOME/build-tools/34.0.0/zipalign -v 4 \
+            app/build/outputs/apk/debug/app-debug.apk \
+            weather.apk
 
       - name: Upload to Release
         if: github.event_name == 'release'
         run: |
           gh release upload ${{ github.event.release.tag_name }} \
-            android/app/build/outputs/apk/release/app-release-unsigned.apk \
+            android/weather.apk \
             --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -45,4 +61,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: weather-now-apk
-          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          path: android/weather.apk
