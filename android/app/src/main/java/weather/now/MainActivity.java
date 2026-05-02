@@ -2,7 +2,6 @@ package weather.now;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -55,22 +54,11 @@ public class MainActivity extends Activity {
             return;
         }
 
-        // 首次进入：先解释，再弹系统授权框
-        new AlertDialog.Builder(this)
-            .setTitle("位置权限")
-            .setMessage("Weather 需要使用您的位置信息来获取当地的天气数据。")
-            .setPositiveButton("允许", (dialog, which) -> {
-                requestPermissions(
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    LOCATION_REQUEST
-                );
-            })
-            .setNegativeButton("跳过", (dialog, which) -> {
-                locationGranted = false;
-                webView.loadUrl(URL);
-            })
-            .setCancelable(false)
-            .show();
+        // 直接弹出系统权限对话框
+        requestPermissions(
+            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+            LOCATION_REQUEST
+        );
     }
 
     @Override

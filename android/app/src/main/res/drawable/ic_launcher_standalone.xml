@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- Background circle -->
+    <path
+        android:fillColor="#1a1a2e"
+        android:pathData="M24,24 m-24,0 a24,24 0,1 1,48 0 a24,24 0,1 1,-48 0"/>
+
+    <!-- Sun -->
+    <path
+        android:fillColor="#fbbf24"
+        android:pathData="M17,14 a5.5,5.5 0,1 1,11 0 a5.5,5.5 0,1 1,-11 0"/>
+
+    <!-- Sun rays -->
+    <path android:fillColor="#fbbf24" android:pathData="M22.5,4 L21,9 L24,9 Z"/>
+    <path android:fillColor="#fbbf24" android:pathData="M22.5,42 L21,37 L24,37 Z"/>
+    <path android:fillColor="#fbbf24" android:pathData="M8,18 L8,17 L12,18 L12,19 Z"/>
+    <path android:fillColor="#fbbf24" android:pathData="M36,18 L36,19 L32,18 L32,17 Z"/>
+
+    <!-- Cloud -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,34 Q10,28 16,26 Q18,20 24,22 Q28,18 32,24 Q38,22 38,28 Q42,28 40,34 L16,34 Q10,34 12,34 Z"/>
+</vector>

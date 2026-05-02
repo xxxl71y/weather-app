@@ -5,22 +5,30 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- 太阳 -->
+    <!-- Sun center -->
     <path
         android:fillColor="#fbbf24"
-        android:pathData="M54,42 m-14,0 a14,14 0,1 1,28 0 a14,14 0,1 1,-28 0"/>
+        android:pathData="M42,30 a12,12 0,1 1,24 0 a12,12 0,1 1,-24 0"/>
 
-    <!-- 太阳光芒 -->
-    <path
-        android:fillColor="#fbbf24"
-        android:pathData="M54,22 L54,26 M54,72 L54,76 M36,42 L40,42 M68,42 L72,42
-                             M41,29 L44,32 M64,52 L67,55 M41,55 L44,52 M64,32 L67,29"
-        android:strokeWidth="3"
-        android:strokeColor="#fbbf24"/>
+    <!-- Sun rays - top -->
+    <path android:fillColor="#fbbf24" android:pathData="M54,14 L52,22 L56,22 Z"/>
+    <!-- bottom -->
+    <path android:fillColor="#fbbf24" android:pathData="M54,76 L52,68 L56,68 Z"/>
+    <!-- left -->
+    <path android:fillColor="#fbbf24" android:pathData="M22,40 L22,38 L30,36 L30,44 Z"/>
+    <!-- right -->
+    <path android:fillColor="#fbbf24" android:pathData="M76,40 L76,44 L68,36 L68,38 Z"/>
+    <!-- top-left -->
+    <path android:fillColor="#fbbf24" android:pathData="M27,25 L25,28 L29,33 L32,29 Z"/>
+    <!-- top-right -->
+    <path android:fillColor="#fbbf24" android:pathData="M81,25 L83,28 L79,33 L76,29 Z"/>
+    <!-- bottom-left -->
+    <path android:fillColor="#fbbf24" android:pathData="M27,69 L29,65 L32,68 L28,72 Z"/>
+    <!-- bottom-right -->
+    <path android:fillColor="#fbbf24" android:pathData="M81,69 L79,65 L76,68 L80,72 Z"/>
 
-    <!-- 云 -->
+    <!-- Cloud -->
     <path
         android:fillColor="#FFFFFF"
-        android:fillAlpha="0.9"
-        android:pathData="M32,70 Q30,62 38,60 Q36,52 46,52 Q56,48 60,58 Q68,54 72,62 Q82,64 78,74 L34,74 Q24,74 32,70Z"/>
+        android:pathData="M30,72 Q24,60 36,56 Q40,46 54,48 Q64,44 70,52 Q82,46 86,58 Q96,58 92,70 Q90,76 90,80 L36,80 Q26,80 30,72 Z"/>
 </vector>
