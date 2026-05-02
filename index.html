@@ -157,6 +157,105 @@
   }
   .btn:active { transform: scale(0.97); }
 
+  /* ===== 设置按钮 ===== */
+  .settings-btn {
+    position: absolute; top: 14px; right: 14px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.55);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.25s ease;
+    backdrop-filter: blur(10px);
+    z-index: 2;
+  }
+  .settings-btn:hover {
+    background: rgba(255,255,255,0.16);
+    border-color: rgba(255,255,255,0.3);
+    color: #fff;
+    transform: rotate(90deg);
+  }
+
+  /* ===== 设置面板 ===== */
+  .settings-panel { display: none; animation: fadeIn 0.3s ease; }
+  .settings-panel.show { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .settings-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .settings-back {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s ease;
+  }
+  .settings-back:hover { background: rgba(255,255,255,0.16); color: #fff; }
+  .settings-title { font-size: 18px; font-weight: 600; color: var(--text); }
+
+  .setting-group { margin-bottom: 20px; }
+  .setting-group-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+    color: rgba(255,255,255,0.35); margin-bottom: 10px;
+  }
+
+  .setting-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-label { font-size: 14px; color: var(--text); }
+  .setting-hint { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+
+  /* Toggle switch */
+  .toggle {
+    position: relative; width: 44px; height: 26px; flex-shrink: 0;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,0.2);
+    border-radius: 26px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .toggle-slider::before {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 20px; height: 20px;
+    background: #fff; border-radius: 50%;
+    transition: transform 0.3s ease;
+  }
+  .toggle input:checked + .toggle-slider { background: #4ade80; }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+  /* Segmented control */
+  .segmented {
+    display: flex; background: rgba(255,255,255,0.1); border-radius: 10px;
+    overflow: hidden; flex-shrink: 0;
+  }
+  .segmented button {
+    padding: 6px 14px; font-size: 13px;
+    background: none; border: none; color: rgba(255,255,255,0.55);
+    cursor: pointer; transition: all 0.2s ease;
+  }
+  .segmented button.active { background: rgba(255,255,255,0.2); color: #fff; font-weight: 600; }
+
+  /* About */
+  .about-text { font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.8; }
+  .about-text a { color: rgba(255,255,255,0.6); }
+
   /* ===== 错误 ===== */
   .error {
     color: #f87171;
@@ -174,18 +273,100 @@
 <canvas id="rainCanvas"></canvas>
 
 <div class="card">
-  <div class="location-row">
-    <span class="loc-dot" id="locDot"></span>
-    <span class="location" id="location">获取位置中...</span>
+  <button class="settings-btn" id="settingsBtn" onclick="toggleSettings()" title="设置">⚙</button>
+
+  <div id="weatherView">
+    <div class="location-row">
+      <span class="loc-dot" id="locDot"></span>
+      <span class="location" id="location">获取位置中...</span>
+    </div>
+    <div class="location-sub" id="locSub"></div>
+    <div class="loader" id="loader"><div class="spinner"></div></div>
+    <div class="weather-icon" id="icon"></div>
+    <div class="temperature" id="temp"></div>
+    <div class="description" id="desc"></div>
+    <div class="error" id="error"></div>
+    <div class="details" id="details"></div>
+    <button class="btn" onclick="fetchWeather()">↻ 刷新</button>
   </div>
-  <div class="location-sub" id="locSub"></div>
-  <div class="loader" id="loader"><div class="spinner"></div></div>
-  <div class="weather-icon" id="icon"></div>
-  <div class="temperature" id="temp"></div>
-  <div class="description" id="desc"></div>
-  <div class="error" id="error"></div>
-  <div class="details" id="details"></div>
-  <button class="btn" onclick="fetchWeather()">↻ 刷新</button>
+
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-header">
+      <button class="settings-back" onclick="toggleSettings()">←</button>
+      <span class="settings-title">设置</span>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-group-label">显示</div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">温度单位</div>
+          <div class="setting-hint">切换摄氏度与华氏度</div>
+        </div>
+        <div class="segmented" id="tempUnit">
+          <button data-val="celsius" class="active">°C</button>
+          <button data-val="fahrenheit">°F</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-group-label">通知</div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">未来1小时雨雪预警</div>
+          <div class="setting-hint">检测到雨雪时实时推送</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="notifyHourly" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">早间天气提醒 (8:00)</div>
+          <div class="setting-hint">当天有雨雪时推送</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="notifyMorning" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">晚间天气提醒 (23:00)</div>
+          <div class="setting-hint">明天有雨雪时提前推送</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="notifyEvening" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-group-label">数据</div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">自动刷新</div>
+          <div class="setting-hint">保持天气数据更新</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="autoRefresh" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-group-label">关于</div>
+      <div class="about-text">
+        天气酱 v2.3<br>
+        基于 <a href="https://open-meteo.com/" target="_blank">Open-Meteo</a> 免费天气数据<br>
+        <a href="https://github.com/xxxl71y/weather-app" target="_blank">GitHub</a>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -385,7 +566,7 @@ async function fetchWeather() {
 
     const wmo = WMO_CODES[c.weather_code] || { icon: '🌈', desc: '未知', theme: 'cloudy' };
     iconEl.textContent = wmo.icon;
-    tempEl.innerHTML = `${Math.round(c.temperature_2m)}<span class="temp-unit">°C</span>`;
+    setLastCelsius(c.temperature_2m);
     descEl.textContent = wmo.desc;
 
     detailsEl.innerHTML = `
@@ -415,7 +596,100 @@ async function fetchWeather() {
   loader.style.display = 'none';
 }
 
+  loader.style.display = 'none';
+}
+
+/* ===== 设置管理 ===== */
+const DEFAULTS = {
+  tempUnit: 'celsius',
+  notifyHourly: true,
+  notifyMorning: true,
+  notifyEvening: true,
+  autoRefresh: true,
+};
+let settings = { ...DEFAULTS };
+let refreshTimer = null;
+
+function loadSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('weather_settings'));
+    if (saved) Object.assign(settings, saved);
+  } catch (_) {}
+}
+function saveSettings() { localStorage.setItem('weather_settings', JSON.stringify(settings)); }
+function applySettingsUI() {
+  document.getElementById('notifyHourly').checked = settings.notifyHourly;
+  document.getElementById('notifyMorning').checked = settings.notifyMorning;
+  document.getElementById('notifyEvening').checked = settings.notifyEvening;
+  document.getElementById('autoRefresh').checked = settings.autoRefresh;
+  const seg = document.getElementById('tempUnit');
+  seg.querySelectorAll('button').forEach(b => {
+    b.classList.toggle('active', b.dataset.val === settings.tempUnit);
+  });
+  if (settings.autoRefresh) startAutoRefresh();
+  else stopAutoRefresh();
+}
+
+function toggleSettings() {
+  const weather = document.getElementById('weatherView');
+  const panel = document.getElementById('settingsPanel');
+  const btn = document.getElementById('settingsBtn');
+  if (panel.classList.contains('show')) {
+    panel.classList.remove('show');
+    weather.style.display = '';
+    btn.style.display = '';
+    saveSettings();
+  } else {
+    applySettingsUI();
+    weather.style.display = 'none';
+    panel.classList.add('show');
+    btn.style.display = 'none';
+  }
+}
+
+// Temp unit segmented control
+document.getElementById('tempUnit').addEventListener('click', e => {
+  if (e.target.tagName !== 'BUTTON') return;
+  settings.tempUnit = e.target.dataset.val;
+  document.getElementById('tempUnit').querySelectorAll('button').forEach(b => {
+    b.classList.toggle('active', b === e.target);
+  });
+  saveSettings();
+  updateTempDisplay();
+});
+
+// Toggle switches
+['notifyHourly','notifyMorning','notifyEvening','autoRefresh'].forEach(id => {
+  document.getElementById(id).addEventListener('change', function() {
+    settings[id] = this.checked;
+    saveSettings();
+    if (id === 'autoRefresh') {
+      this.checked ? startAutoRefresh() : stopAutoRefresh();
+    }
+  });
+});
+
+let lastCelsius = null;
+function setLastCelsius(c) { lastCelsius = c; updateTempDisplay(); }
+function updateTempDisplay() {
+  const tempEl = document.getElementById('temp');
+  if (lastCelsius == null) return;
+  const val = settings.tempUnit === 'fahrenheit' ? Math.round(lastCelsius * 9 / 5 + 32) : Math.round(lastCelsius);
+  const unit = settings.tempUnit === 'fahrenheit' ? '°F' : '°C';
+  tempEl.innerHTML = val + '<span class="temp-unit">' + unit + '</span>';
+}
+
+function startAutoRefresh() {
+  stopAutoRefresh();
+  refreshTimer = setInterval(fetchWeather, 30 * 60 * 1000);
+}
+function stopAutoRefresh() { if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; } }
+
+loadSettings();
+
+/* ===== 主流程 ===== */
 fetchWeather();
+if (settings.autoRefresh) startAutoRefresh();
 
 // PWA: 注册 Service Worker
 if ('serviceWorker' in navigator) {
