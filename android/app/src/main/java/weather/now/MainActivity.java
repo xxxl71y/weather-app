@@ -15,9 +15,9 @@ import android.webkit.WebViewClient;
 
 public class MainActivity extends Activity {
     private static final String URL = "file:///android_asset/index.html";
-    private static final int LOCATION_REQUEST = 100;
+    private static final int PERM_REQUEST = 100;
     private WebView webView;
-    private boolean locationGranted = false;
+    private boolean permissionsReady = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +46,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        requestLocationPermission();
+        requestAllPermissions();
 
         // Start background weather monitoring
         BootReceiver.scheduleAll(this);
@@ -63,34 +63,40 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void requestLocationPermission() {
+    private void requestAllPermissions() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            locationGranted = true;
+            permissionsReady = true;
             webView.loadUrl(URL);
             return;
         }
 
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationGranted = true;
+        java.util.ArrayList<String> needed = new java.util.ArrayList<>();
+
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            needed.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                needed.add(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
+
+        if (needed.isEmpty()) {
+            permissionsReady = true;
             webView.loadUrl(URL);
             return;
         }
 
-        // 直接弹出系统权限对话框
-        requestPermissions(
-            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-            LOCATION_REQUEST
-        );
+        requestPermissions(needed.toArray(new String[0]), PERM_REQUEST);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == LOCATION_REQUEST) {
-            locationGranted = grantResults.length > 0
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED;
-            webView.loadUrl(URL);
-        }
+        if (requestCode != PERM_REQUEST) return;
+        permissionsReady = true;
+        webView.loadUrl(URL);
     }
 
     @Override
