@@ -38,9 +38,10 @@ jobs:
 
       - name: Upload to Release
         if: github.event_name == 'release'
-        run: gh release upload ${{ github.event.release.tag_name }} WeatherNow-Android.apk --repo ${{ github.repository }}
-        env:
-          GH_TOKEN: ${{ github.token }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: WeatherNow-Android.apk
 
       - uses: actions/upload-artifact@v4
         with:
@@ -59,17 +60,14 @@ jobs:
         run: ISCC.exe setup.iss
 
       - name: Rename EXE
-        shell: pwsh
         run: ren WeatherNow-Setup.exe WeatherNow-Windows.exe
 
       - name: Upload to Release
         if: github.event_name == 'release'
-        shell: pwsh
-        run: gh release upload $env:TAG_NAME WeatherNow-Windows.exe --repo $env:REPO
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG_NAME: ${{ github.event.release.tag_name }}
-          REPO: ${{ github.repository }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: WeatherNow-Windows.exe
 
       - uses: actions/upload-artifact@v4
         with:
