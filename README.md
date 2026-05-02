@@ -9,7 +9,8 @@
 | 平台 | 方式 | 说明 |
 |------|------|------|
 | **任意浏览器** | 打开上述链接 | 即开即用 |
-| **Windows 桌面** | 下载 [EXE 安装包](https://github.com/xxxl71y/weather-app/releases) | 一键安装，生成桌面快捷方式，Edge 无边框窗口 |
+| **Windows 桌面** | 方式一：Edge 浏览器打开网页 → 地址栏安装图标 | 安装为独立桌面应用，启动菜单 + 桌面快捷方式 |
+| | 方式二：下载 [ZIP](https://github.com/xxxl71y/weather-app/releases) 解压运行 setup.ps1 | 同上 |
 | **Android** | 下载 [APK](https://github.com/xxxl71y/weather-app/releases) 安装 | 独立应用，WebView 封装，支持定位权限 |
 
 ## 功能
