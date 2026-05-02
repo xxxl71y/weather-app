@@ -11,7 +11,6 @@
 | **任意浏览器** | 打开上述链接 | 即开即用 |
 | **Windows 桌面** | 下载后运行 `install.bat` | 桌面快捷方式，Edge 应用模式（无边框独立窗口） |
 | **Android** | 下载 [APK](https://github.com/xxxl71y/weather-app/releases) 安装 | 独立应用，WebView 封装，支持定位权限 |
-| **iOS / macOS** | Safari 打开链接 → 分享 → 添加到主屏幕 | 安装为 PWA，离线可用 |
 
 ## 功能
 
