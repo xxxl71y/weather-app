@@ -335,6 +335,7 @@ async function fetchWeather() {
     });
     lat = pos.coords.latitude;
     lon = pos.coords.longitude;
+    if (typeof WeatherApp !== 'undefined') WeatherApp.saveLocation(lat, lon);
     usingGPS = true;
   } catch (e) {
     try {
@@ -343,6 +344,7 @@ async function fetchWeather() {
         const ipData = await ipRes.json();
         lat = ipData.latitude;
         lon = ipData.longitude;
+        if (typeof WeatherApp !== 'undefined') WeatherApp.saveLocation(lat, lon);
         locName = ipData.city || ipData.region || '';
       }
     } catch (_) {}

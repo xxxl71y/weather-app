@@ -2,10 +2,12 @@ package weather.now;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.webkit.GeolocationPermissions;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -21,6 +23,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        WeatherNotificationHelper.createChannel(this);
+
         webView = new WebView(this);
         setContentView(webView);
 
@@ -32,6 +36,8 @@ public class MainActivity extends Activity {
         settings.setLoadWithOverviewMode(true);
         settings.setUseWideViewPort(true);
 
+        webView.addJavascriptInterface(new LocationBridge(), "WeatherApp");
+
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -41,6 +47,20 @@ public class MainActivity extends Activity {
         });
 
         requestLocationPermission();
+
+        // Start background weather monitoring
+        BootReceiver.scheduleAll(this);
+    }
+
+    class LocationBridge {
+        @JavascriptInterface
+        public void saveLocation(double lat, double lon) {
+            getSharedPreferences("weather", MODE_PRIVATE)
+                .edit()
+                .putFloat("lat", (float) lat)
+                .putFloat("lon", (float) lon)
+                .apply();
+        }
     }
 
     private void requestLocationPermission() {
