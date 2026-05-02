@@ -9,8 +9,9 @@
 <title>天气酱</title>
 <style>
   :root {
-    --text: #fff;
-    --text-secondary: rgba(255,255,255,0.65);
+    --text: #f0f0f0;
+    --text-secondary: rgba(240,240,240,0.65);
+    --text-shadow: 0 1px 3px rgba(0,0,0,0.35);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -42,7 +43,7 @@
   /* ===== 卡片 ===== */
   .card {
     position: relative; z-index: 1;
-    background: rgba(255,255,255,0.07);
+    background: rgba(255,255,255,0.06);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
     border-radius: 32px;
@@ -50,10 +51,11 @@
     width: 400px;
     text-align: center;
     box-shadow:
-      0 8px 32px rgba(0,0,0,0.12),
-      0 2px 8px rgba(0,0,0,0.06),
-      inset 0 1px 0 rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.12);
+      0 8px 32px rgba(0,0,0,0.18),
+      0 2px 8px rgba(0,0,0,0.08),
+      0 0 0 1px rgba(255,255,255,0.06),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.08);
     animation: cardIn 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
     transition: transform 0.3s ease;
   }
@@ -85,8 +87,8 @@
     flex-shrink: 0;
   }
   .loc-dot.ip { background: #facc15; box-shadow: 0 0 8px rgba(250,204,21,0.5); }
-  .location { font-size: 24px; font-weight: 600; color: var(--text); letter-spacing: 0.5px; }
-  .location-sub { font-size: 12px; opacity: 0.45; margin-bottom: 8px; letter-spacing: 0.3px; }
+  .location { font-size: 24px; font-weight: 600; color: var(--text); letter-spacing: 0.5px; text-shadow: var(--text-shadow); }
+  .location-sub { font-size: 12px; opacity: 0.5; margin-bottom: 8px; letter-spacing: 0.3px; color: var(--text-secondary); }
 
   /* ===== 天气主体 ===== */
   .weather-icon {
@@ -107,15 +109,18 @@
     color: var(--text);
     line-height: 1;
     margin-bottom: 4px;
+    text-shadow: var(--text-shadow);
   }
-  .temp-unit { font-size: 28px; font-weight: 300; opacity: 0.55; vertical-align: super; }
+  .temp-unit { font-size: 28px; font-weight: 300; opacity: 0.6; vertical-align: super; }
 
   .description {
     font-size: 17px;
     font-weight: 400;
-    opacity: 0.7;
+    opacity: 0.75;
     margin-bottom: 8px;
     letter-spacing: 0.5px;
+    color: var(--text);
+    text-shadow: var(--text-shadow);
   }
 
   /* ===== 详情行 ===== */
@@ -132,8 +137,8 @@
     padding: 4px 0;
   }
   .detail-icon { font-size: 20px; opacity: 0.7; }
-  .detail-value { font-size: 15px; font-weight: 600; color: var(--text); }
-  .detail-label { font-size: 11px; opacity: 0.4; letter-spacing: 0.8px; }
+  .detail-value { font-size: 15px; font-weight: 600; color: var(--text); text-shadow: var(--text-shadow); }
+  .detail-label { font-size: 11px; opacity: 0.45; letter-spacing: 0.8px; color: var(--text-secondary); }
 
   /* ===== 刷新按钮 ===== */
   .btn {
@@ -212,12 +217,16 @@
 
   .setting-row {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 0;
+    padding: 14px 0;
     border-bottom: 1px solid rgba(255,255,255,0.06);
+    min-height: 52px;
   }
   .setting-row:last-child { border-bottom: none; }
-  .setting-label { font-size: 14px; color: var(--text); }
-  .setting-hint { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+  .setting-row > div:first-child {
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .setting-label { font-size: 14px; color: var(--text); text-shadow: var(--text-shadow); }
+  .setting-hint { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 3px; }
 
   /* Toggle switch */
   .toggle {
@@ -253,23 +262,17 @@
   .segmented button.active { background: rgba(255,255,255,0.2); color: #fff; font-weight: 600; }
 
   /* Time input */
-  .time-input {
-    width: 80px; padding: 6px 8px;
+  .setting-control {
+    width: 96px; padding: 7px 8px;
     background: rgba(255,255,255,0.1);
     border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 8px; color: #fff; font-size: 14px;
+    border-radius: 8px; color: #f0f0f0; font-size: 14px;
     text-align: center; flex-shrink: 0;
-    font-family: inherit;
+    font-family: inherit; box-sizing: border-box;
   }
-  .time-input::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.6; cursor: pointer; }
-  .interval-select {
-    padding: 6px 10px;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 8px; color: #fff; font-size: 13px;
-    flex-shrink: 0; font-family: inherit; cursor: pointer;
-  }
-  .interval-select option { background: #1a1a2e; color: #fff; }
+  .setting-control::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.6; cursor: pointer; }
+  select.setting-control { cursor: pointer; }
+  select.setting-control option { background: #1a1a2e; color: #f0f0f0; }
 
   /* About */
   .about-text { font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.8; }
@@ -336,7 +339,7 @@
           <div class="setting-label">雨雪监测频率</div>
           <div class="setting-hint">后台检测雨雪的时间间隔</div>
         </div>
-        <select class="interval-select" id="notifyInterval">
+        <select class="setting-control" id="notifyInterval">
           <option value="0">关闭</option>
           <option value="30">30 分钟</option>
           <option value="60" selected>1 小时</option>
@@ -348,14 +351,14 @@
           <div class="setting-label">早间天气提醒</div>
           <div class="setting-hint">当天有雨雪时在此时间推送</div>
         </div>
-        <input type="time" class="time-input" id="notifyMorningTime" value="08:00">
+        <input type="time" class="setting-control" id="notifyMorningTime" value="08:00">
       </div>
       <div class="setting-row">
         <div>
           <div class="setting-label">晚间天气提醒</div>
           <div class="setting-hint">明天有雨雪时在此时间推送</div>
         </div>
-        <input type="time" class="time-input" id="notifyEveningTime" value="23:00">
+        <input type="time" class="setting-control" id="notifyEveningTime" value="23:00">
       </div>
     </div>
 
@@ -612,7 +615,7 @@ async function fetchWeather() {
 }
 
 /* ===== 设置管理 ===== */
-const APP_VERSION = '2.5';
+const APP_VERSION = '2.6';
 document.getElementById('appVersion').textContent = 'v' + APP_VERSION;
 
 const DEFAULTS = {
