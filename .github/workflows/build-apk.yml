@@ -59,13 +59,17 @@ jobs:
         run: ISCC.exe setup.iss
 
       - name: Rename EXE
+        shell: pwsh
         run: ren WeatherNow-Setup.exe WeatherNow-Windows.exe
 
       - name: Upload to Release
         if: github.event_name == 'release'
-        run: gh release upload ${{ github.event.release.tag_name }} WeatherNow-Windows.exe --repo ${{ github.repository }}
+        shell: pwsh
+        run: gh release upload $env:TAG_NAME WeatherNow-Windows.exe --repo $env:REPO
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+          REPO: ${{ github.repository }}
 
       - uses: actions/upload-artifact@v4
         with:
