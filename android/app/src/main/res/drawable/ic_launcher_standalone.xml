@@ -5,60 +5,140 @@
     android:viewportWidth="48"
     android:viewportHeight="48">
 
-    <!-- Background: warm gradient-like layered circles -->
+    <!-- Background: soft sky gradient circles -->
     <path
-        android:fillColor="#FFE0B2"
+        android:fillColor="#E3F2FD"
         android:pathData="M24,24 m-24,0 a24,24 0,1 1,48 0 a24,24 0,1 1,-48 0"/>
     <path
-        android:fillColor="#FFCC80"
+        android:fillColor="#BBDEFB"
         android:pathData="M24,24 m-20,0 a20,20 0,1 1,40 0 a20,20 0,1 1,-40 0"/>
 
-    <!-- Sun rays - 8 rays -->
-    <path android:fillColor="#FFB74D" android:pathData="M24,3 L22,8 L26,8 Z"/>
-    <path android:fillColor="#FFB74D" android:pathData="M24,40 L22,35 L26,35 Z"/>
-    <path android:fillColor="#FFB74D" android:pathData="M8,18 L13,16 L13,20 Z"/>
-    <path android:fillColor="#FFB74D" android:pathData="M40,18 L35,16 L35,20 Z"/>
-    <path android:fillColor="#FFB74D" android:pathData="M12,10 L15,13 L17,9 Z"/>
-    <path android:fillColor="#FFB74D" android:pathData="M36,10 L33,13 L31,9 Z"/>
-    <path android:fillColor="#FFB74D" android:pathData="M12,33 L15,30 L17,34 Z"/>
-    <path android:fillColor="#FFB74D" android:pathData="M36,33 L33,30 L31,34 Z"/>
-
-    <!-- Sun body -->
+    <!-- Weather elements: small clouds and stars -->
+    <!-- Cloud top-right -->
     <path
-        android:fillColor="#FFD54F"
-        android:pathData="M24,11 a9,9 0,1 1,0 18 a9,9 0,1 1,0 -18"/>
-
-    <!-- Sun highlight - crescent -->
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.7"
+        android:pathData="M38,8 Q36,5 40,4 Q42,1 44,4 Q47,3 47,6 Q48,8 45,8 Z"/>
+    <!-- Cloud top-left -->
     <path
-        android:fillColor="#FFECB3"
-        android:pathData="M22,13 a6,6 0,0 0,0 10 a6,6 0,0 1,0 -10"/>
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.5"
+        android:pathData="M6,6 Q4,4 7,2 Q9,0 11,2 Q13,2 13,4 Q14,6 11,6 Z"/>
 
-    <!-- Eyes - cute round dots -->
-    <path android:fillColor="#5D4037" android:pathData="M19.5,17.5 a1.3,1.5 0,1 1,0 3 a1.3,1.5 0,1 1,0 -3"/>
-    <path android:fillColor="#5D4037" android:pathData="M28.5,17.5 a1.3,1.5 0,1 1,0 3 a1.3,1.5 0,1 1,0 -3"/>
+    <!-- Small stars/sparkles -->
+    <path android:fillColor="#FFD54F" android:pathData="M38,18 L39,16 L40,18 L42,19 L40,20 L39,22 L38,20 L36,19 Z"/>
+    <path android:fillColor="#FFD54F" android:pathData="M8,20 L8.8,19 L9.6,20 L8.8,21 L8,20 Z"/>
 
-    <!-- Eye highlights -->
-    <path android:fillColor="#FFFFFF" android:pathData="M20,17 a0.5,0.5 0,1 1,0 1 a0.5,0.5 0,1 1,0 -1"/>
-    <path android:fillColor="#FFFFFF" android:pathData="M29,17 a0.5,0.5 0,1 1,0 1 a0.5,0.5 0,1 1,0 -1"/>
+    <!-- Hair back/base - blue -->
+    <path
+        android:fillColor="#64B5F6"
+        android:pathData="M12,16 Q10,26 12,32 Q14,36 20,36 Q24,38 28,36 Q34,36 36,32 Q38,26 36,16 Z"/>
 
-    <!-- Blush -->
-    <path android:fillColor="#FF8A80" android:fillAlpha="0.6" android:pathData="M17,20 a2.5,2 0,1 1,0 4 a2.5,2 0,1 1,0 -4"/>
-    <path android:fillColor="#FF8A80" android:fillAlpha="0.6" android:pathData="M31,20 a2.5,2 0,1 1,0 4 a2.5,2 0,1 1,0 -4"/>
+    <!-- Hair twin buns (odango) -->
+    <path android:fillColor="#64B5F6" android:pathData="M11,14 a5,5 0,1 1,0 10 a5,5 0,1 1,0 -10"/>
+    <path android:fillColor="#64B5F6" android:pathData="M37,14 a5,5 0,1 1,0 10 a5,5 0,1 1,0 -10"/>
 
-    <!-- Mouth - cute smile -->
+    <!-- Hair highlights on buns -->
+    <path android:fillColor="#90CAF9" android:pathData="M11,12 a3.5,3.5 0,1 1,0 7 a3.5,3.5 0,1 1,0 -7"/>
+    <path android:fillColor="#90CAF9" android:pathData="M37,12 a3.5,3.5 0,1 1,0 7 a3.5,3.5 0,1 1,0 -7"/>
+
+    <!-- Bangs -->
+    <path
+        android:fillColor="#64B5F6"
+        android:pathData="M15,18 Q14,14 18,12 Q20,16 19,20 Q18,21 16,20 Z"/>
+    <path
+        android:fillColor="#64B5F6"
+        android:pathData="M19,12 Q24,10 29,12 Q30,16 29,20 Q28,21 26,20 Q25,16 24,15 Q23,16 22,20 Q20,21 19,20 Z"/>
+    <path
+        android:fillColor="#64B5F6"
+        android:pathData="M29,12 Q34,14 33,18 Q32,21 30,20 Q29,16 28,15 Z"/>
+
+    <!-- Side hair strands -->
+    <path android:fillColor="#64B5F6" android:pathData="M12,22 Q10,28 10,33 Q12,34 13,32 Q14,27 14,22 Z"/>
+    <path android:fillColor="#64B5F6" android:pathData="M36,22 Q38,28 38,33 Q36,34 35,32 Q34,27 34,22 Z"/>
+
+    <!-- Face - peach skin -->
+    <path
+        android:fillColor="#FFD5B8"
+        android:pathData="M24,16 a7.5,7.5 0,1 1,0 15 a7.5,7.5 0,1 1,0 -15"/>
+
+    <!-- Face highlight -->
+    <path
+        android:fillColor="#FFE0CC"
+        android:pathData="M24,16 a7.5,7.5 0,1 1,0 15 a7.5,7.5 0,1 1,0 -15"/>
+    <path
+        android:fillColor="#FFE0CC"
+        android:pathData="M21,18 a5.5,5.5 0,0 0,0 10 a5.5,5.5 0,0 1,0 -10"/>
+
+    <!-- Eyebrows -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#5D4037"
-        android:strokeWidth="0.8"
-        android:pathData="M22,21 Q24,23 26,21"/>
-
-    <!-- Cloud body - fluffy overlapping circles -->
+        android:strokeWidth="0.6"
+        android:strokeLineCap="round"
+        android:pathData="M17.5,19.5 Q19.5,18.5 21.5,19.5"/>
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M10,38 Q8,33 14,31 Q16,26 22,28 Q27,23 33,27 Q38,24 39,30 Q43,31 41,36 L10,38 Q8,39 10,38 Z"/>
+        android:fillColor="#00000000"
+        android:strokeColor="#5D4037"
+        android:strokeWidth="0.6"
+        android:strokeLineCap="round"
+        android:pathData="M26.5,19.5 Q28.5,18.5 30.5,19.5"/>
 
-    <!-- Cloud highlight -->
+    <!-- Eyes - large anime style -->
+    <path android:fillColor="#4E342E" android:pathData="M17,21.5 a2.8,3.5 0,1 1,0 7 a2.8,3.5 0,1 1,0 -7"/>
+    <path android:fillColor="#4E342E" android:pathData="M27,21.5 a2.8,3.5 0,1 1,0 7 a2.8,3.5 0,1 1,0 -7"/>
+
+    <!-- Eye highlights - main sparkle -->
+    <path android:fillColor="#FFFFFF" android:pathData="M18,20.5 a1.1,1.1 0,1 1,0 2.2 a1.1,1.1 0,1 1,0 -2.2"/>
+    <path android:fillColor="#FFFFFF" android:pathData="M28,20.5 a1.1,1.1 0,1 1,0 2.2 a1.1,1.1 0,1 1,0 -2.2"/>
+
+    <!-- Eye highlights - small sparkle -->
+    <path android:fillColor="#FFFFFF" android:pathData="M20,20 a0.6,0.6 0,1 1,0 1.2 a0.6,0.6 0,1 1,0 -1.2"/>
+    <path android:fillColor="#FFFFFF" android:pathData="M30,20 a0.6,0.6 0,1 1,0 1.2 a0.6,0.6 0,1 1,0 -1.2"/>
+
+    <!-- Eye bottom highlight -->
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.5" android:pathData="M19,24 a0.6,0.4 0,1 1,0 0.8 a0.6,0.4 0,1 1,0 -0.8"/>
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.5" android:pathData="M29,24 a0.6,0.4 0,1 1,0 0.8 a0.6,0.4 0,1 1,0 -0.8"/>
+
+    <!-- Eyelashes - upper line -->
     <path
-        android:fillColor="#F5F5F5"
-        android:pathData="M14,31 Q16,26 22,28 Q27,23 33,27 Q36,25 36,29 Q30,26 24,28 Q18,28 14,31 Z"/>
+        android:fillColor="#00000000"
+        android:strokeColor="#3E2723"
+        android:strokeWidth="0.7"
+        android:strokeLineCap="round"
+        android:pathData="M14.5,21.5 Q17,17.5 19.5,21.5"/>
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#3E2723"
+        android:strokeWidth="0.7"
+        android:strokeLineCap="round"
+        android:pathData="M24.5,21.5 Q27,17.5 29.5,21.5"/>
+
+    <!-- Blush -->
+    <path android:fillColor="#FF8A80" android:fillAlpha="0.45" android:pathData="M15.5,24.5 a2.2,1.6 0,1 1,0 3.2 a2.2,1.6 0,1 1,0 -3.2"/>
+    <path android:fillColor="#FF8A80" android:fillAlpha="0.45" android:pathData="M32.5,24.5 a2.2,1.6 0,1 1,0 3.2 a2.2,1.6 0,1 1,0 -3.2"/>
+
+    <!-- Mouth - cute small smile -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#E57373"
+        android:strokeWidth="0.7"
+        android:strokeLineCap="round"
+        android:pathData="M22.5,27 Q24,28.2 25.5,27"/>
+
+    <!-- Sun hairpin accessory -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M33,12 a3.2,3.2 0,1 1,0 6.4 a3.2,3.2 0,1 1,0 -6.4"/>
+    <path android:fillColor="#FFEB3B" android:pathData="M33,11.5 a2.2,2.2 0,1 1,0 4.4 a2.2,2.2 0,1 1,0 -4.4"/>
+    <!-- Sun rays -->
+    <path android:fillColor="#FFD54F" android:pathData="M33,7.5 L31.5,10.5 L34.5,10.5 Z"/>
+    <path android:fillColor="#FFD54F" android:pathData="M33,18 L31.5,15 L34.5,15 Z"/>
+    <path android:fillColor="#FFD54F" android:pathData="M28.5,12.5 L31,11 L31,14 Z"/>
+    <path android:fillColor="#FFD54F" android:pathData="M37.5,12.5 L35,11 L35,14 Z"/>
+
+    <!-- Small raindrop decoration at left bun -->
+    <path
+        android:fillColor="#90CAF9"
+        android:pathData="M9,10 Q10,7 11,10 Q10,12 9,10 Z"/>
 </vector>
