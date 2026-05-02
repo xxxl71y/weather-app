@@ -252,6 +252,25 @@
   }
   .segmented button.active { background: rgba(255,255,255,0.2); color: #fff; font-weight: 600; }
 
+  /* Time input */
+  .time-input {
+    width: 80px; padding: 6px 8px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px; color: #fff; font-size: 14px;
+    text-align: center; flex-shrink: 0;
+    font-family: inherit;
+  }
+  .time-input::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.6; cursor: pointer; }
+  .interval-select {
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px; color: #fff; font-size: 13px;
+    flex-shrink: 0; font-family: inherit; cursor: pointer;
+  }
+  .interval-select option { background: #1a1a2e; color: #fff; }
+
   /* About */
   .about-text { font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.8; }
   .about-text a { color: rgba(255,255,255,0.6); }
@@ -314,33 +333,29 @@
       <div class="setting-group-label">通知</div>
       <div class="setting-row">
         <div>
-          <div class="setting-label">未来1小时雨雪预警</div>
-          <div class="setting-hint">检测到雨雪时实时推送</div>
+          <div class="setting-label">雨雪监测频率</div>
+          <div class="setting-hint">后台检测雨雪的时间间隔</div>
         </div>
-        <label class="toggle">
-          <input type="checkbox" id="notifyHourly" checked>
-          <span class="toggle-slider"></span>
-        </label>
+        <select class="interval-select" id="notifyInterval">
+          <option value="0">关闭</option>
+          <option value="30">30 分钟</option>
+          <option value="60" selected>1 小时</option>
+          <option value="120">2 小时</option>
+        </select>
       </div>
       <div class="setting-row">
         <div>
-          <div class="setting-label">早间天气提醒 (8:00)</div>
-          <div class="setting-hint">当天有雨雪时推送</div>
+          <div class="setting-label">早间天气提醒</div>
+          <div class="setting-hint">当天有雨雪时在此时间推送</div>
         </div>
-        <label class="toggle">
-          <input type="checkbox" id="notifyMorning" checked>
-          <span class="toggle-slider"></span>
-        </label>
+        <input type="time" class="time-input" id="notifyMorningTime" value="08:00">
       </div>
       <div class="setting-row">
         <div>
-          <div class="setting-label">晚间天气提醒 (23:00)</div>
-          <div class="setting-hint">明天有雨雪时提前推送</div>
+          <div class="setting-label">晚间天气提醒</div>
+          <div class="setting-hint">明天有雨雪时在此时间推送</div>
         </div>
-        <label class="toggle">
-          <input type="checkbox" id="notifyEvening" checked>
-          <span class="toggle-slider"></span>
-        </label>
+        <input type="time" class="time-input" id="notifyEveningTime" value="23:00">
       </div>
     </div>
 
@@ -361,7 +376,7 @@
     <div class="setting-group">
       <div class="setting-group-label">关于</div>
       <div class="about-text">
-        天气酱 v2.3<br>
+        天气酱 <span id="appVersion"></span><br>
         基于 <a href="https://open-meteo.com/" target="_blank">Open-Meteo</a> 免费天气数据<br>
         <a href="https://github.com/xxxl71y/weather-app" target="_blank">GitHub</a>
       </div>
@@ -597,11 +612,14 @@ async function fetchWeather() {
 }
 
 /* ===== 设置管理 ===== */
+const APP_VERSION = '2.5';
+document.getElementById('appVersion').textContent = 'v' + APP_VERSION;
+
 const DEFAULTS = {
   tempUnit: 'celsius',
-  notifyHourly: true,
-  notifyMorning: true,
-  notifyEvening: true,
+  notifyInterval: 60,
+  notifyMorningTime: '08:00',
+  notifyEveningTime: '23:00',
   autoRefresh: true,
 };
 let settings = { ...DEFAULTS };
@@ -615,9 +633,9 @@ function loadSettings() {
 }
 function saveSettings() { localStorage.setItem('weather_settings', JSON.stringify(settings)); }
 function applySettingsUI() {
-  document.getElementById('notifyHourly').checked = settings.notifyHourly;
-  document.getElementById('notifyMorning').checked = settings.notifyMorning;
-  document.getElementById('notifyEvening').checked = settings.notifyEvening;
+  document.getElementById('notifyInterval').value = settings.notifyInterval;
+  document.getElementById('notifyMorningTime').value = settings.notifyMorningTime;
+  document.getElementById('notifyEveningTime').value = settings.notifyEveningTime;
   document.getElementById('autoRefresh').checked = settings.autoRefresh;
   const seg = document.getElementById('tempUnit');
   seg.querySelectorAll('button').forEach(b => {
@@ -655,15 +673,25 @@ document.getElementById('tempUnit').addEventListener('click', e => {
   updateTempDisplay();
 });
 
-// Toggle switches
-['notifyHourly','notifyMorning','notifyEvening','autoRefresh'].forEach(id => {
+// Notification interval selector
+document.getElementById('notifyInterval').addEventListener('change', function() {
+  settings.notifyInterval = parseInt(this.value);
+  saveSettings();
+});
+
+// Time pickers
+['notifyMorningTime','notifyEveningTime'].forEach(id => {
   document.getElementById(id).addEventListener('change', function() {
-    settings[id] = this.checked;
+    settings[id] = this.value;
     saveSettings();
-    if (id === 'autoRefresh') {
-      this.checked ? startAutoRefresh() : stopAutoRefresh();
-    }
   });
+});
+
+// Auto-refresh toggle
+document.getElementById('autoRefresh').addEventListener('change', function() {
+  settings.autoRefresh = this.checked;
+  saveSettings();
+  this.checked ? startAutoRefresh() : stopAutoRefresh();
 });
 
 let lastCelsius = null;
