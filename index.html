@@ -274,6 +274,11 @@
   select.setting-control { cursor: pointer; }
   select.setting-control option { background: #1a1a2e; color: #f0f0f0; }
 
+  /* Time pair (hour : minute selects) */
+  .time-pair { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+  .time-pair .setting-control { width: 48px; }
+  .time-sep { color: rgba(255,255,255,0.4); font-size: 14px; margin: 0 1px; }
+
   /* About */
   .about-text { font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.8; }
   .about-text a { color: rgba(255,255,255,0.6); }
@@ -351,14 +356,22 @@
           <div class="setting-label">早间天气提醒</div>
           <div class="setting-hint">当天有雨雪时在此时间推送</div>
         </div>
-        <input type="time" class="setting-control" id="notifyMorningTime" value="08:00">
+        <div class="time-pair">
+          <select class="setting-control" id="notifyMorningH"></select>
+          <span class="time-sep">:</span>
+          <select class="setting-control" id="notifyMorningM"></select>
+        </div>
       </div>
       <div class="setting-row">
         <div>
           <div class="setting-label">晚间天气提醒</div>
           <div class="setting-hint">明天有雨雪时在此时间推送</div>
         </div>
-        <input type="time" class="setting-control" id="notifyEveningTime" value="23:00">
+        <div class="time-pair">
+          <select class="setting-control" id="notifyEveningH"></select>
+          <span class="time-sep">:</span>
+          <select class="setting-control" id="notifyEveningM"></select>
+        </div>
       </div>
     </div>
 
@@ -615,7 +628,7 @@ async function fetchWeather() {
 }
 
 /* ===== 设置管理 ===== */
-const APP_VERSION = '2.6';
+const APP_VERSION = '2.6.1';
 document.getElementById('appVersion').textContent = 'v' + APP_VERSION;
 
 const DEFAULTS = {
@@ -637,8 +650,8 @@ function loadSettings() {
 function saveSettings() { localStorage.setItem('weather_settings', JSON.stringify(settings)); }
 function applySettingsUI() {
   document.getElementById('notifyInterval').value = settings.notifyInterval;
-  document.getElementById('notifyMorningTime').value = settings.notifyMorningTime;
-  document.getElementById('notifyEveningTime').value = settings.notifyEveningTime;
+  setTimeSelects('notifyMorning', settings.notifyMorningTime);
+  setTimeSelects('notifyEvening', settings.notifyEveningTime);
   document.getElementById('autoRefresh').checked = settings.autoRefresh;
   const seg = document.getElementById('tempUnit');
   seg.querySelectorAll('button').forEach(b => {
@@ -682,13 +695,32 @@ document.getElementById('notifyInterval').addEventListener('change', function() 
   saveSettings();
 });
 
-// Time pickers
-['notifyMorningTime','notifyEveningTime'].forEach(id => {
-  document.getElementById(id).addEventListener('change', function() {
-    settings[id] = this.value;
-    saveSettings();
-  });
-});
+// Time selects (hour + minute) — guaranteed 24h on all platforms
+(function initTimeSelects() {
+  const hours = Array.from({length: 24}, (_, i) => String(i).padStart(2, '0'));
+  const mins = ['00', '30'];
+  function populate(prefix) {
+    const hSel = document.getElementById(prefix + 'H');
+    const mSel = document.getElementById(prefix + 'M');
+    hours.forEach(h => hSel.add(new Option(h, h)));
+    mins.forEach(m => mSel.add(new Option(m, m)));
+    hSel.addEventListener('change', () => {
+      settings[prefix + 'Time'] = hSel.value + ':' + mSel.value;
+      saveSettings();
+    });
+    mSel.addEventListener('change', () => {
+      settings[prefix + 'Time'] = hSel.value + ':' + mSel.value;
+      saveSettings();
+    });
+  }
+  populate('notifyMorning');
+  populate('notifyEvening');
+})();
+window.setTimeSelects = function(prefix, timeStr) {
+  const [h, m] = timeStr.split(':');
+  document.getElementById(prefix + 'H').value = h;
+  document.getElementById(prefix + 'M').value = m;
+};
 
 // Auto-refresh toggle
 document.getElementById('autoRefresh').addEventListener('change', function() {
