@@ -227,8 +227,8 @@
     display: flex; flex-direction: column; justify-content: center;
     flex: 1; min-width: 0;
   }
-  .setting-label { font-size: 14px; color: var(--text); text-shadow: var(--text-shadow); line-height: 1.3; }
-  .setting-hint { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 3px; line-height: 1.3; }
+  .setting-label { font-size: 14px; color: var(--text); text-shadow: var(--text-shadow); line-height: 1.3; text-align: left; }
+  .setting-hint { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 3px; line-height: 1.3; text-align: left; }
 
   /* Toggle switch */
   .toggle {
@@ -433,7 +433,13 @@
           <div class="setting-label">雨雪监测频率</div>
           <div class="setting-hint">后台检测雨雪的时间间隔</div>
         </div>
-        <button class="time-display" id="notifyIntervalBtn" onclick="openFreqPicker()">1 小时</button>
+        <div class="alert-row">
+          <button class="time-display" id="notifyIntervalBtn" onclick="openFreqPicker()">1 小时</button>
+          <label class="toggle">
+            <input type="checkbox" id="notifyIntervalOn" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
       </div>
       <div class="setting-row">
         <div>
@@ -728,11 +734,12 @@ async function fetchWeather() {
 }
 
 /* ===== 设置管理 ===== */
-const APP_VERSION = '2.9.1';
+const APP_VERSION = '2.9.2';
 document.getElementById('appVersion').textContent = 'v' + APP_VERSION;
 
 const DEFAULTS = {
   tempUnit: 'celsius',
+  notifyIntervalOn: true,
   notifyInterval: 60,
   notifyMorningTime: '08:00',
   notifyMorningOn: true,
@@ -740,7 +747,12 @@ const DEFAULTS = {
   notifyEveningOn: true,
   autoRefresh: true,
 };
-const FREQ_LABELS = { 0:'关闭', 30:'30 分钟', 60:'1 小时', 120:'2 小时' };
+const FREQ_OPTS = [
+  { label:'30 分钟', val:30 },
+  { label:'1 小时',  val:60 },
+  { label:'2 小时',  val:120 },
+];
+function freqLabel(v) { const o = FREQ_OPTS.find(f => f.val === v); return o ? o.label : '1 小时'; }
 let settings = { ...DEFAULTS };
 let refreshTimer = null;
 
@@ -752,7 +764,7 @@ function loadSettings() {
 }
 function saveSettings() { localStorage.setItem('weather_settings', JSON.stringify(settings)); }
 function applySettingsUI() {
-  document.getElementById('notifyIntervalBtn').textContent = FREQ_LABELS[settings.notifyInterval] || '1 小时';
+  updateFreqUI();
   updateAlertBtn('notifyMorning', settings.notifyMorningOn, settings.notifyMorningTime);
   updateAlertBtn('notifyEvening', settings.notifyEveningOn, settings.notifyEveningTime);
   document.getElementById('notifyMorningOn').checked = settings.notifyMorningOn;
@@ -764,6 +776,12 @@ function applySettingsUI() {
   });
   if (settings.autoRefresh) startAutoRefresh();
   else stopAutoRefresh();
+}
+function updateFreqUI() {
+  document.getElementById('notifyIntervalOn').checked = settings.notifyIntervalOn;
+  const btn = document.getElementById('notifyIntervalBtn');
+  btn.textContent = settings.notifyIntervalOn ? freqLabel(settings.notifyInterval) : '关闭';
+  btn.classList.toggle('off', !settings.notifyIntervalOn);
 }
 function updateAlertBtn(prefix, on, time) {
   const btn = document.getElementById(prefix + 'Btn');
@@ -799,12 +817,12 @@ document.getElementById('tempUnit').addEventListener('click', e => {
   updateTempDisplay();
 });
 
-// Alert on/off toggles
-['notifyMorningOn','notifyEveningOn'].forEach(id => {
+// Alert & frequency on/off toggles
+['notifyIntervalOn','notifyMorningOn','notifyEveningOn'].forEach(id => {
   document.getElementById(id).addEventListener('change', function() {
     settings[id] = this.checked;
-    const prefix = id.replace('On','');
-    updateAlertBtn(prefix, this.checked, settings[prefix + 'Time']);
+    if (id === 'notifyIntervalOn') updateFreqUI();
+    else { const prefix = id.replace('On',''); updateAlertBtn(prefix, this.checked, settings[prefix + 'Time']); }
     saveSettings();
   });
 });
@@ -834,17 +852,16 @@ function populateCol(id, items, cls) {
 
 function openFreqPicker() {
   tpMode = 'freq';
-  const items = ['关闭','30 分钟','1 小时','2 小时'];
-  const vals = [0, 30, 60, 120];
+  const items = FREQ_OPTS.map(f => f.label);
   populateCol('tpHours', items, ' freq-item');
   document.getElementById('tpHours').classList.add('freq-single');
   document.getElementById('tpMins').style.display = 'none';
   document.querySelector('.tp-colon').style.display = 'none';
   document.querySelector('.tp-title').textContent = '选择频率';
-  const cur = items.indexOf(FREQ_LABELS[settings.notifyInterval] || '1 小时');
+  const curLabel = freqLabel(settings.notifyInterval);
   document.getElementById('tpHours').querySelectorAll('.tp-col-item').forEach((el, i) => {
-    el.classList.toggle('active', i === cur);
-    el._val = vals[i];
+    el.classList.toggle('active', el.textContent === curLabel);
+    el._val = FREQ_OPTS[i].val;
   });
   document.getElementById('tpOverlay').classList.add('show');
   requestAnimationFrame(() => {
