@@ -212,7 +212,8 @@
   .setting-group { margin-bottom: 20px; }
   .setting-group-label {
     font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
-    color: rgba(255,255,255,0.35); margin-bottom: 8px; padding-left: 1px;
+    color: rgba(255,255,255,0.35); margin-bottom: 8px;
+    text-align: left; padding-left: 2px;
   }
 
   .setting-row {
@@ -302,6 +303,12 @@
     background: rgba(255,255,255,0.14);
     border-color: rgba(255,255,255,0.3);
   }
+  .time-display.off {
+    color: rgba(255,255,255,0.3); pointer-events: none;
+  }
+  .alert-row {
+    display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+  }
 
   /* Time picker overlay */
   .tp-overlay {
@@ -345,6 +352,8 @@
     color: #fff; font-weight: 600; font-size: 26px;
     background: rgba(255,255,255,0.1);
   }
+  .tp-col-item.freq-item { font-size: 16px; }
+  .tp-col-item.freq-item.active { font-size: 20px; }
   .tp-colon {
     font-size: 26px; color: rgba(255,255,255,0.4);
     display: flex; align-items: center; height: 260px;
@@ -359,7 +368,7 @@
   .tp-done:hover { background: rgba(255,255,255,0.2); }
 
   /* About */
-  .about-text { font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.8; }
+  .about-text { font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.8; text-align: left; padding-left: 2px; }
   .about-text a { color: rgba(255,255,255,0.6); }
 
   /* ===== 错误 ===== */
@@ -423,26 +432,33 @@
           <div class="setting-label">雨雪监测频率</div>
           <div class="setting-hint">后台检测雨雪的时间间隔</div>
         </div>
-        <select class="setting-control" id="notifyInterval">
-          <option value="0">关闭</option>
-          <option value="30">30 分钟</option>
-          <option value="60" selected>1 小时</option>
-          <option value="120">2 小时</option>
-        </select>
+        <button class="time-display" id="notifyIntervalBtn" onclick="openFreqPicker()">1 小时</button>
       </div>
       <div class="setting-row">
         <div>
           <div class="setting-label">早间天气提醒</div>
           <div class="setting-hint">当天有雨雪时在此时间推送</div>
         </div>
-        <button class="time-display" id="notifyMorningBtn" onclick="openTimePicker('notifyMorning')">08:00</button>
+        <div class="alert-row">
+          <button class="time-display" id="notifyMorningBtn" onclick="openTimePicker('notifyMorning')">08:00</button>
+          <label class="toggle">
+            <input type="checkbox" id="notifyMorningOn" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
       </div>
       <div class="setting-row">
         <div>
           <div class="setting-label">晚间天气提醒</div>
           <div class="setting-hint">明天有雨雪时在此时间推送</div>
         </div>
-        <button class="time-display" id="notifyEveningBtn" onclick="openTimePicker('notifyEvening')">23:00</button>
+        <div class="alert-row">
+          <button class="time-display" id="notifyEveningBtn" onclick="openTimePicker('notifyEvening')">23:00</button>
+          <label class="toggle">
+            <input type="checkbox" id="notifyEveningOn" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
       </div>
     </div>
 
@@ -711,16 +727,19 @@ async function fetchWeather() {
 }
 
 /* ===== 设置管理 ===== */
-const APP_VERSION = '2.8.1';
+const APP_VERSION = '2.9';
 document.getElementById('appVersion').textContent = 'v' + APP_VERSION;
 
 const DEFAULTS = {
   tempUnit: 'celsius',
   notifyInterval: 60,
   notifyMorningTime: '08:00',
+  notifyMorningOn: true,
   notifyEveningTime: '23:00',
+  notifyEveningOn: true,
   autoRefresh: true,
 };
+const FREQ_LABELS = { 0:'关闭', 30:'30 分钟', 60:'1 小时', 120:'2 小时' };
 let settings = { ...DEFAULTS };
 let refreshTimer = null;
 
@@ -732,9 +751,11 @@ function loadSettings() {
 }
 function saveSettings() { localStorage.setItem('weather_settings', JSON.stringify(settings)); }
 function applySettingsUI() {
-  document.getElementById('notifyInterval').value = settings.notifyInterval;
-  document.getElementById('notifyMorningBtn').textContent = settings.notifyMorningTime;
-  document.getElementById('notifyEveningBtn').textContent = settings.notifyEveningTime;
+  document.getElementById('notifyIntervalBtn').textContent = FREQ_LABELS[settings.notifyInterval] || '1 小时';
+  updateAlertBtn('notifyMorning', settings.notifyMorningOn, settings.notifyMorningTime);
+  updateAlertBtn('notifyEvening', settings.notifyEveningOn, settings.notifyEveningTime);
+  document.getElementById('notifyMorningOn').checked = settings.notifyMorningOn;
+  document.getElementById('notifyEveningOn').checked = settings.notifyEveningOn;
   document.getElementById('autoRefresh').checked = settings.autoRefresh;
   const seg = document.getElementById('tempUnit');
   seg.querySelectorAll('button').forEach(b => {
@@ -742,6 +763,11 @@ function applySettingsUI() {
   });
   if (settings.autoRefresh) startAutoRefresh();
   else stopAutoRefresh();
+}
+function updateAlertBtn(prefix, on, time) {
+  const btn = document.getElementById(prefix + 'Btn');
+  btn.textContent = on ? time : '关闭';
+  btn.classList.toggle('off', !on);
 }
 
 function toggleSettings() {
@@ -772,41 +798,95 @@ document.getElementById('tempUnit').addEventListener('click', e => {
   updateTempDisplay();
 });
 
-// Notification interval selector
-document.getElementById('notifyInterval').addEventListener('change', function() {
-  settings.notifyInterval = parseInt(this.value);
-  saveSettings();
+// Alert on/off toggles
+['notifyMorningOn','notifyEveningOn'].forEach(id => {
+  document.getElementById(id).addEventListener('change', function() {
+    settings[id] = this.checked;
+    const prefix = id.replace('On','');
+    updateAlertBtn(prefix, this.checked, settings[prefix + 'Time']);
+    saveSettings();
+  });
 });
 
-// Custom 24h time picker
-let tpTarget = null;
+// Custom time picker (shared overlay)
+let tpMode = null, tpTarget = null;
+const H = 260, IH = 44, CENTER = (H - IH) / 2;
+
+function populateCol(id, items, cls) {
+  const col = document.getElementById(id);
+  col.innerHTML = '';
+  items.forEach(v => { const d = document.createElement('div'); d.className = 'tp-col-item' + (cls||''); d.textContent = v; col.appendChild(d); });
+}
+
 (function initTimePicker() {
-  const hours = Array.from({length: 24}, (_, i) => String(i).padStart(2, '0'));
-  const mins  = Array.from({length: 60}, (_, i) => String(i).padStart(2, '0'));
-  hours.forEach(h => { const d = document.createElement('div'); d.className = 'tp-col-item'; d.textContent = h; d.onclick = () => selectTP('h', h); document.getElementById('tpHours').appendChild(d); });
-  mins.forEach(m =>  { const d = document.createElement('div'); d.className = 'tp-col-item'; d.textContent = m; d.onclick = () => selectTP('m', m); document.getElementById('tpMins').appendChild(d); });
+  populateCol('tpHours', Array.from({length: 24}, (_, i) => String(i).padStart(2, '0')));
+  populateCol('tpMins',  Array.from({length: 60}, (_, i) => String(i).padStart(2, '0')));
+  document.getElementById('tpHours').addEventListener('click', e => {
+    if (e.target.classList.contains('tp-col-item')) selectTPVal(e.target.textContent);
+  });
+  document.getElementById('tpMins').addEventListener('click', e => {
+    if (e.target.classList.contains('tp-col-item')) selectTPVal(e.target.textContent);
+  });
 })();
+
+function openFreqPicker() {
+  tpMode = 'freq';
+  const items = ['关闭','30 分钟','1 小时','2 小时'];
+  const vals = [0, 30, 60, 120];
+  populateCol('tpHours', items, ' freq-item');
+  document.getElementById('tpMins').style.display = 'none';
+  document.querySelector('.tp-colon').style.display = 'none';
+  document.querySelector('.tp-title').textContent = '选择频率';
+  const cur = items.indexOf(FREQ_LABELS[settings.notifyInterval] || '1 小时');
+  document.getElementById('tpHours').querySelectorAll('.tp-col-item').forEach((el, i) => {
+    el.classList.toggle('active', i === cur);
+    el._val = vals[i];
+  });
+  document.getElementById('tpOverlay').classList.add('show');
+  requestAnimationFrame(() => {
+    const active = document.getElementById('tpHours').querySelector('.active');
+    if (active) document.getElementById('tpHours').scrollTop = active.offsetTop - CENTER;
+  });
+}
+
 function openTimePicker(key) {
-  tpTarget = key;
+  tpMode = 'time'; tpTarget = key;
+  document.getElementById('tpMins').style.display = '';
+  document.querySelector('.tp-colon').style.display = '';
+  document.querySelector('.tp-title').textContent = '选择时间';
+  populateCol('tpHours', Array.from({length: 24}, (_, i) => String(i).padStart(2, '0')));
+  populateCol('tpMins',  Array.from({length: 60}, (_, i) => String(i).padStart(2, '0')));
   const time = settings[key + 'Time'];
   const [h, m] = time.split(':');
   document.getElementById('tpHours').querySelectorAll('.tp-col-item').forEach(el => el.classList.toggle('active', el.textContent === h));
   document.getElementById('tpMins').querySelectorAll('.tp-col-item').forEach(el => el.classList.toggle('active', el.textContent === m));
-  const H = 260, IH = 44, center = (H - IH) / 2;
-  document.getElementById('tpHours').scrollTop = (document.getElementById('tpHours').querySelector('.active')?.offsetTop || 0) - center;
-  document.getElementById('tpMins').scrollTop = (document.getElementById('tpMins').querySelector('.active')?.offsetTop || 0) - center;
   document.getElementById('tpOverlay').classList.add('show');
+  requestAnimationFrame(() => {
+    const ah = document.getElementById('tpHours').querySelector('.active');
+    const am = document.getElementById('tpMins').querySelector('.active');
+    if (ah) document.getElementById('tpHours').scrollTop = ah.offsetTop - CENTER;
+    if (am) document.getElementById('tpMins').scrollTop = am.offsetTop - CENTER;
+  });
 }
-function selectTP(type, val) {
-  const time = settings[tpTarget + 'Time'];
-  const [h, m] = time.split(':');
-  settings[tpTarget + 'Time'] = (type === 'h' ? val : h) + ':' + (type === 'm' ? val : m);
-  document.getElementById(tpTarget + 'Btn').textContent = settings[tpTarget + 'Time'];
+
+function selectTPVal(val) {
+  if (tpMode === 'freq') {
+    const active = document.getElementById('tpHours').querySelector('.active');
+    settings.notifyInterval = active._val;
+    document.getElementById('notifyIntervalBtn').textContent = active.textContent;
+  } else {
+    const [h, m] = settings[tpTarget + 'Time'].split(':');
+    const hSel = document.getElementById('tpHours').querySelector('.active');
+    const mSel = document.getElementById('tpMins').querySelector('.active');
+    settings[tpTarget + 'Time'] = (hSel?.textContent || h) + ':' + (mSel?.textContent || m);
+    document.getElementById(tpTarget + 'Btn').textContent = settings[tpTarget + 'Time'];
+  }
   saveSettings();
 }
+
 function closeTimePicker() {
   document.getElementById('tpOverlay').classList.remove('show');
-  tpTarget = null;
+  tpMode = null; tpTarget = null;
 }
 
 // Auto-refresh toggle
