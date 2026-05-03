@@ -287,13 +287,75 @@
   }
   select.setting-control option { background: #1a1a2e; color: #f0f0f0; }
 
-  /* Native time input */
-  .time-native {
-    width: 110px; padding: 8px 10px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.45)' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 6v6l4 2'/%3E%3C/svg%3E");
-    background-size: 14px; background-position: right 8px center; background-repeat: no-repeat;
+  /* Custom time display button */
+  .time-display {
+    padding: 8px 14px; min-width: 70px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px; color: #f0f0f0; font-size: 15px; font-weight: 500;
+    font-family: inherit; cursor: pointer; text-align: center;
+    transition: all 0.25s ease; flex-shrink: 0;
+    letter-spacing: 1px;
   }
-  .time-native::-webkit-calendar-picker-indicator { opacity: 0; width: 100%; height: 100%; position: absolute; cursor: pointer; }
+  .time-display:hover {
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.3);
+  }
+
+  /* Time picker overlay */
+  .tp-overlay {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+    justify-content: center; align-items: flex-end; padding-bottom: 20px;
+  }
+  .tp-overlay.show { display: flex; }
+  .tp-panel {
+    width: 320px; max-height: 420px;
+    background: rgba(22,22,40,0.95);
+    backdrop-filter: blur(30px);
+    border-radius: 20px; padding: 20px 16px 16px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.5);
+    animation: tpUp 0.25s ease;
+  }
+  @keyframes tpUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .tp-title {
+    text-align: center; font-size: 15px; font-weight: 600;
+    color: rgba(255,255,255,0.7); margin-bottom: 16px;
+  }
+  .tp-columns {
+    display: flex; justify-content: center; align-items: flex-start; gap: 8px;
+    height: 260px; overflow: hidden;
+  }
+  .tp-col {
+    flex: 1; max-width: 100px; height: 100%;
+    overflow-y: auto; scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tp-col::-webkit-scrollbar { display: none; }
+  .tp-col-item {
+    height: 44px; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; color: rgba(255,255,255,0.3); cursor: pointer;
+    scroll-snap-align: start; border-radius: 10px;
+    transition: all 0.15s ease; font-variant-numeric: tabular-nums;
+  }
+  .tp-col-item.active {
+    color: #fff; font-weight: 600; font-size: 26px;
+    background: rgba(255,255,255,0.1);
+  }
+  .tp-colon {
+    font-size: 26px; color: rgba(255,255,255,0.4);
+    display: flex; align-items: center; height: 260px;
+  }
+  .tp-done {
+    display: block; width: 100%; margin-top: 14px; padding: 12px;
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; color: #fff; font-size: 15px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+    transition: all 0.2s ease;
+  }
+  .tp-done:hover { background: rgba(255,255,255,0.2); }
 
   /* About */
   .about-text { font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.8; }
@@ -372,14 +434,14 @@
           <div class="setting-label">早间天气提醒</div>
           <div class="setting-hint">当天有雨雪时在此时间推送</div>
         </div>
-        <input type="time" class="setting-control time-native" id="notifyMorningTime" value="08:00">
+        <button class="time-display" id="notifyMorningBtn" onclick="openTimePicker('notifyMorning')">08:00</button>
       </div>
       <div class="setting-row">
         <div>
           <div class="setting-label">晚间天气提醒</div>
           <div class="setting-hint">明天有雨雪时在此时间推送</div>
         </div>
-        <input type="time" class="setting-control time-native" id="notifyEveningTime" value="23:00">
+        <button class="time-display" id="notifyEveningBtn" onclick="openTimePicker('notifyEvening')">23:00</button>
       </div>
     </div>
 
@@ -405,6 +467,18 @@
         <a href="https://github.com/xxxl71y/weather-app" target="_blank">GitHub</a>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="tp-overlay" id="tpOverlay" onclick="closeTimePicker()">
+  <div class="tp-panel" onclick="event.stopPropagation()">
+    <div class="tp-title">选择时间</div>
+    <div class="tp-columns">
+      <div class="tp-col" id="tpHours"></div>
+      <div class="tp-colon">:</div>
+      <div class="tp-col" id="tpMins"></div>
+    </div>
+    <button class="tp-done" onclick="closeTimePicker()">确定</button>
   </div>
 </div>
 
@@ -636,7 +710,7 @@ async function fetchWeather() {
 }
 
 /* ===== 设置管理 ===== */
-const APP_VERSION = '2.7.1';
+const APP_VERSION = '2.8';
 document.getElementById('appVersion').textContent = 'v' + APP_VERSION;
 
 const DEFAULTS = {
@@ -658,8 +732,8 @@ function loadSettings() {
 function saveSettings() { localStorage.setItem('weather_settings', JSON.stringify(settings)); }
 function applySettingsUI() {
   document.getElementById('notifyInterval').value = settings.notifyInterval;
-  document.getElementById('notifyMorningTime').value = settings.notifyMorningTime;
-  document.getElementById('notifyEveningTime').value = settings.notifyEveningTime;
+  document.getElementById('notifyMorningBtn').textContent = settings.notifyMorningTime;
+  document.getElementById('notifyEveningBtn').textContent = settings.notifyEveningTime;
   document.getElementById('autoRefresh').checked = settings.autoRefresh;
   const seg = document.getElementById('tempUnit');
   seg.querySelectorAll('button').forEach(b => {
@@ -703,13 +777,35 @@ document.getElementById('notifyInterval').addEventListener('change', function() 
   saveSettings();
 });
 
-// Native time inputs — Android shows system time picker
-['notifyMorningTime','notifyEveningTime'].forEach(id => {
-  document.getElementById(id).addEventListener('change', function() {
-    settings[id] = this.value;
-    saveSettings();
-  });
-});
+// Custom 24h time picker
+let tpTarget = null;
+(function initTimePicker() {
+  const hours = Array.from({length: 24}, (_, i) => String(i).padStart(2, '0'));
+  const mins  = Array.from({length: 60}, (_, i) => String(i).padStart(2, '0'));
+  hours.forEach(h => { const d = document.createElement('div'); d.className = 'tp-col-item'; d.textContent = h; d.onclick = () => selectTP('h', h); document.getElementById('tpHours').appendChild(d); });
+  mins.forEach(m =>  { const d = document.createElement('div'); d.className = 'tp-col-item'; d.textContent = m; d.onclick = () => selectTP('m', m); document.getElementById('tpMins').appendChild(d); });
+})();
+function openTimePicker(key) {
+  tpTarget = key;
+  const time = settings[key + 'Time'];
+  const [h, m] = time.split(':');
+  document.getElementById('tpHours').querySelectorAll('.tp-col-item').forEach(el => el.classList.toggle('active', el.textContent === h));
+  document.getElementById('tpMins').querySelectorAll('.tp-col-item').forEach(el => el.classList.toggle('active', el.textContent === m));
+  document.getElementById('tpHours').scrollTop = document.getElementById('tpHours').querySelector('.active')?.offsetTop - 120 || 0;
+  document.getElementById('tpMins').scrollTop = document.getElementById('tpMins').querySelector('.active')?.offsetTop - 120 || 0;
+  document.getElementById('tpOverlay').classList.add('show');
+}
+function selectTP(type, val) {
+  const time = settings[tpTarget + 'Time'];
+  const [h, m] = time.split(':');
+  settings[tpTarget + 'Time'] = (type === 'h' ? val : h) + ':' + (type === 'm' ? val : m);
+  document.getElementById(tpTarget + 'Btn').textContent = settings[tpTarget + 'Time'];
+  saveSettings();
+}
+function closeTimePicker() {
+  document.getElementById('tpOverlay').classList.remove('show');
+  tpTarget = null;
+}
 
 // Auto-refresh toggle
 document.getElementById('autoRefresh').addEventListener('change', function() {
