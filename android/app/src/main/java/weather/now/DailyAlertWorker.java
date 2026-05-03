@@ -48,12 +48,15 @@ public class DailyAlertWorker extends Worker {
             String apiUrl = "https://api.open-meteo.com/v1/forecast"
                 + "?latitude=" + lat + "&longitude=" + lon
                 + "&daily=weather_code,precipitation_sum"
+                + "&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,precipitation"
                 + "&forecast_days=" + days + "&timezone=auto";
             org.json.JSONObject json = HourlyWeatherWorker.fetchJson(apiUrl);
             if (json == null) {
                 scheduleNext(ctx, ns, mode);
                 return Result.success();
             }
+
+            HourlyWeatherWorker.cacheCurrentWeather(json, ctx, lat, lon);
 
             org.json.JSONArray daily = json.getJSONObject("daily").getJSONArray("weather_code");
             int idx = mode.equals("tomorrow") ? 1 : 0;

@@ -81,6 +81,20 @@ public class MainActivity extends Activity {
                 .putString("notifySettings", json)
                 .apply();
         }
+
+        @JavascriptInterface
+        public String getWeatherCache() {
+            return getSharedPreferences("weather", MODE_PRIVATE)
+                .getString("weatherCache", "");
+        }
+
+        @JavascriptInterface
+        public void saveWeatherCache(String json) {
+            getSharedPreferences("weather", MODE_PRIVATE)
+                .edit()
+                .putString("weatherCache", json)
+                .apply();
+        }
     }
 
     private void requestBatteryExemption() {

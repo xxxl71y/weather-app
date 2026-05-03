@@ -35,9 +35,13 @@ public class HourlyWeatherWorker extends Worker {
             String apiUrl = "https://api.open-meteo.com/v1/forecast"
                 + "?latitude=" + lat + "&longitude=" + lon
                 + "&hourly=precipitation_probability,weather_code,precipitation"
+                + "&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,precipitation"
                 + "&forecast_hours=3&timezone=auto";
             JSONObject json = fetchJson(apiUrl);
             if (json == null) return Result.retry();
+
+            // Cache current weather for WebView fast load
+            cacheCurrentWeather(json, ctx, lat, lon);
 
             JSONObject hourly = json.getJSONObject("hourly");
             JSONArray codes = hourly.getJSONArray("weather_code");
@@ -81,6 +85,27 @@ public class HourlyWeatherWorker extends Worker {
         if (code >= 85 && code <= 86) return "阵雪";
         if (code >= 95 && code <= 99) return "雷暴";
         return null;
+    }
+
+    static void cacheCurrentWeather(JSONObject json, Context ctx, float lat, float lon) {
+        try {
+            if (!json.has("current")) return;
+            JSONObject cur = json.getJSONObject("current");
+            JSONObject cache = new JSONObject();
+            cache.put("lat", lat);
+            cache.put("lon", lon);
+            cache.put("temperature", cur.getDouble("temperature_2m"));
+            cache.put("humidity", cur.getInt("relative_humidity_2m"));
+            cache.put("windSpeed", cur.getDouble("wind_speed_10m"));
+            cache.put("weatherCode", cur.getInt("weather_code"));
+            cache.put("precipitation", cur.getDouble("precipitation"));
+            cache.put("locName", "");
+            cache.put("locDetail", "");
+            cache.put("usingGPS", true);
+            cache.put("timestamp", System.currentTimeMillis());
+            ctx.getSharedPreferences("weather", Context.MODE_PRIVATE)
+                .edit().putString("weatherCache", cache.toString()).apply();
+        } catch (Exception ignored) {}
     }
 
     static JSONObject fetchJson(String urlStr) throws Exception {
