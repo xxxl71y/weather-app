@@ -213,7 +213,7 @@
   .setting-group-label {
     font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
     color: rgba(255,255,255,0.35); margin-bottom: 8px;
-    text-align: left; padding-left: 2px;
+    text-align: left;
   }
 
   .setting-row {
@@ -352,8 +352,9 @@
     color: #fff; font-weight: 600; font-size: 26px;
     background: rgba(255,255,255,0.1);
   }
-  .tp-col-item.freq-item { font-size: 16px; }
-  .tp-col-item.freq-item.active { font-size: 20px; }
+  .tp-col.freq-single { max-width: 180px; }
+  .tp-col-item.freq-item { font-size: 18px; white-space: nowrap; }
+  .tp-col-item.freq-item.active { font-size: 22px; }
   .tp-colon {
     font-size: 26px; color: rgba(255,255,255,0.4);
     display: flex; align-items: center; height: 260px;
@@ -368,7 +369,7 @@
   .tp-done:hover { background: rgba(255,255,255,0.2); }
 
   /* About */
-  .about-text { font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.8; text-align: left; padding-left: 2px; }
+  .about-text { font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.8; text-align: left; }
   .about-text a { color: rgba(255,255,255,0.6); }
 
   /* ===== 错误 ===== */
@@ -727,7 +728,7 @@ async function fetchWeather() {
 }
 
 /* ===== 设置管理 ===== */
-const APP_VERSION = '2.9';
+const APP_VERSION = '2.9.1';
 document.getElementById('appVersion').textContent = 'v' + APP_VERSION;
 
 const DEFAULTS = {
@@ -822,10 +823,12 @@ function populateCol(id, items, cls) {
   populateCol('tpHours', Array.from({length: 24}, (_, i) => String(i).padStart(2, '0')));
   populateCol('tpMins',  Array.from({length: 60}, (_, i) => String(i).padStart(2, '0')));
   document.getElementById('tpHours').addEventListener('click', e => {
-    if (e.target.classList.contains('tp-col-item')) selectTPVal(e.target.textContent);
+    const el = e.target.closest('.tp-col-item');
+    if (el) selectTPVal(el);
   });
   document.getElementById('tpMins').addEventListener('click', e => {
-    if (e.target.classList.contains('tp-col-item')) selectTPVal(e.target.textContent);
+    const el = e.target.closest('.tp-col-item');
+    if (el) selectTPVal(el);
   });
 })();
 
@@ -834,6 +837,7 @@ function openFreqPicker() {
   const items = ['关闭','30 分钟','1 小时','2 小时'];
   const vals = [0, 30, 60, 120];
   populateCol('tpHours', items, ' freq-item');
+  document.getElementById('tpHours').classList.add('freq-single');
   document.getElementById('tpMins').style.display = 'none';
   document.querySelector('.tp-colon').style.display = 'none';
   document.querySelector('.tp-title').textContent = '选择频率';
@@ -851,6 +855,7 @@ function openFreqPicker() {
 
 function openTimePicker(key) {
   tpMode = 'time'; tpTarget = key;
+  document.getElementById('tpHours').classList.remove('freq-single');
   document.getElementById('tpMins').style.display = '';
   document.querySelector('.tp-colon').style.display = '';
   document.querySelector('.tp-title').textContent = '选择时间';
@@ -869,17 +874,22 @@ function openTimePicker(key) {
   });
 }
 
-function selectTPVal(val) {
+function selectTPVal(el) {
+  const col = el.parentElement;
+  col.querySelectorAll('.tp-col-item').forEach(d => d.classList.remove('active'));
+  el.classList.add('active');
+  el.scrollIntoView({block:'center', behavior:'smooth'});
+
   if (tpMode === 'freq') {
-    const active = document.getElementById('tpHours').querySelector('.active');
-    settings.notifyInterval = active._val;
-    document.getElementById('notifyIntervalBtn').textContent = active.textContent;
+    settings.notifyInterval = el._val;
+    document.getElementById('notifyIntervalBtn').textContent = el.textContent;
   } else {
-    const [h, m] = settings[tpTarget + 'Time'].split(':');
     const hSel = document.getElementById('tpHours').querySelector('.active');
     const mSel = document.getElementById('tpMins').querySelector('.active');
-    settings[tpTarget + 'Time'] = (hSel?.textContent || h) + ':' + (mSel?.textContent || m);
-    document.getElementById(tpTarget + 'Btn').textContent = settings[tpTarget + 'Time'];
+    if (hSel && mSel) {
+      settings[tpTarget + 'Time'] = hSel.textContent + ':' + mSel.textContent;
+      document.getElementById(tpTarget + 'Btn').textContent = settings[tpTarget + 'Time'];
+    }
   }
   saveSettings();
 }
