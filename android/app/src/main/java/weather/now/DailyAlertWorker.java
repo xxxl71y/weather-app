@@ -51,14 +51,14 @@ public class DailyAlertWorker extends Worker {
                 + "&forecast_days=" + days + "&timezone=auto";
             org.json.JSONObject json = HourlyWeatherWorker.fetchJson(apiUrl);
             if (json == null) {
-                scheduleNext(ctx, mode);
+                scheduleNext(ctx, ns, mode);
                 return Result.success();
             }
 
             org.json.JSONArray daily = json.getJSONObject("daily").getJSONArray("weather_code");
             int idx = mode.equals("tomorrow") ? 1 : 0;
             if (idx >= daily.length()) {
-                scheduleNext(ctx, mode);
+                scheduleNext(ctx, ns, mode);
                 return Result.success();
             }
 
