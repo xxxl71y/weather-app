@@ -28,6 +28,14 @@ public class DailyAlertWorker extends Worker {
         if (mode == null) mode = "today";
 
         SharedPreferences prefs = ctx.getSharedPreferences("weather", Context.MODE_PRIVATE);
+
+        // Check if this alert is enabled
+        String onKey = mode.equals("tomorrow") ? "notifyEveningOn" : "notifyMorningOn";
+        if (!HourlyWeatherWorker.isEnabled(prefs, onKey, true)) {
+            scheduleNext(ctx, mode);
+            return Result.success();
+        }
+
         float lat = prefs.getFloat("lat", Float.NaN);
         float lon = prefs.getFloat("lon", Float.NaN);
         if (Float.isNaN(lat) || Float.isNaN(lon)) {
@@ -74,12 +82,30 @@ public class DailyAlertWorker extends Worker {
 
     static void scheduleNext(Context ctx, String mode) {
         String workName = mode.equals("tomorrow") ? WORK_NAME_EVENING : WORK_NAME_MORNING;
-        int hour = mode.equals("tomorrow") ? 23 : 8;
+        String timeKey = mode.equals("tomorrow") ? "notifyEveningTime" : "notifyMorningTime";
+        int defHour = mode.equals("tomorrow") ? 23 : 8;
+        int defMin = 0;
+
+        // Read custom time from settings
+        int hour = defHour, min = defMin;
+        SharedPreferences prefs = ctx.getSharedPreferences("weather", Context.MODE_PRIVATE);
+        try {
+            String json = prefs.getString("notifySettings", null);
+            if (json != null) {
+                org.json.JSONObject s = new org.json.JSONObject(json);
+                String time = s.optString(timeKey, "");
+                if (!time.isEmpty()) {
+                    String[] parts = time.split(":");
+                    hour = Integer.parseInt(parts[0]);
+                    min = Integer.parseInt(parts[1]);
+                }
+            }
+        } catch (Exception ignored) {}
 
         Calendar now = Calendar.getInstance();
         Calendar target = Calendar.getInstance();
         target.set(Calendar.HOUR_OF_DAY, hour);
-        target.set(Calendar.MINUTE, 0);
+        target.set(Calendar.MINUTE, min);
         target.set(Calendar.SECOND, 0);
         target.set(Calendar.MILLISECOND, 0);
         if (!target.after(now)) target.add(Calendar.DAY_OF_MONTH, 1);

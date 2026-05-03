@@ -2,10 +2,14 @@ package weather.now;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
@@ -36,7 +40,7 @@ public class MainActivity extends Activity {
         settings.setLoadWithOverviewMode(true);
         settings.setUseWideViewPort(true);
 
-        webView.addJavascriptInterface(new LocationBridge(), "WeatherApp");
+        webView.addJavascriptInterface(new AppBridge(), "WeatherApp");
 
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient() {
@@ -50,9 +54,15 @@ public class MainActivity extends Activity {
 
         // Start background weather monitoring
         BootReceiver.scheduleAll(this);
+
+        // Request battery optimization exemption
+        requestBatteryExemption();
+
+        // Request auto-start permission (Chinese ROMs)
+        requestAutoStart();
     }
 
-    class LocationBridge {
+    class AppBridge {
         @JavascriptInterface
         public void saveLocation(double lat, double lon) {
             getSharedPreferences("weather", MODE_PRIVATE)
@@ -60,6 +70,64 @@ public class MainActivity extends Activity {
                 .putFloat("lat", (float) lat)
                 .putFloat("lon", (float) lon)
                 .apply();
+        }
+
+        @JavascriptInterface
+        public void saveNotificationSettings(String json) {
+            getSharedPreferences("weather", MODE_PRIVATE)
+                .edit()
+                .putString("notifySettings", json)
+                .apply();
+        }
+    }
+
+    private void requestBatteryExemption() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+            if (!pm.isIgnoringBatteryOptimizations(getPackageName())) {
+                try {
+                    Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                    intent.setData(Uri.parse("package:" + getPackageName()));
+                    startActivity(intent);
+                } catch (Exception ignored) {}
+            }
+        }
+    }
+
+    private void requestAutoStart() {
+        try {
+            Intent intent = new Intent();
+            intent.setClassName("com.miui.securitycenter",
+                "com.miui.permcenter.autostart.AutoStartManagementActivity");
+            startActivity(intent);
+        } catch (Exception e1) {
+            try {
+                Intent intent = new Intent();
+                intent.setClassName("com.huawei.systemmanager",
+                    "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity");
+                startActivity(intent);
+            } catch (Exception e2) {
+                try {
+                    Intent intent = new Intent();
+                    intent.setClassName("com.coloros.safecenter",
+                        "com.coloros.safecenter.permission.startup.StartupAppListActivity");
+                    startActivity(intent);
+                } catch (Exception e3) {
+                    try {
+                        Intent intent = new Intent();
+                        intent.setClassName("com.vivo.permissionmanager",
+                            "com.vivo.permissionmanager.activity.BgStartUpManagerActivity");
+                        startActivity(intent);
+                    } catch (Exception e4) {
+                        try {
+                            Intent intent = new Intent();
+                            intent.setClassName("com.samsung.android.lool",
+                                "com.samsung.android.sm.ui.battery.BatteryActivity");
+                            startActivity(intent);
+                        } catch (Exception ignored) {}
+                    }
+                }
+            }
         }
     }
 

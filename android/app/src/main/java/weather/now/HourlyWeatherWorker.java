@@ -23,6 +23,10 @@ public class HourlyWeatherWorker extends Worker {
     public Result doWork() {
         Context ctx = getApplicationContext();
         SharedPreferences prefs = ctx.getSharedPreferences("weather", Context.MODE_PRIVATE);
+
+        // Check if hourly monitoring is enabled
+        if (!isEnabled(prefs, "notifyIntervalOn", true)) return Result.success();
+
         float lat = prefs.getFloat("lat", Float.NaN);
         float lon = prefs.getFloat("lon", Float.NaN);
         if (Float.isNaN(lat) || Float.isNaN(lon)) return Result.success();
@@ -77,6 +81,15 @@ public class HourlyWeatherWorker extends Worker {
         if (code >= 85 && code <= 86) return "阵雪";
         if (code >= 95 && code <= 99) return "雷暴";
         return null;
+    }
+
+    static boolean isEnabled(SharedPreferences prefs, String key, boolean def) {
+        try {
+            String json = prefs.getString("notifySettings", null);
+            if (json == null) return def;
+            JSONObject s = new JSONObject(json);
+            return s.optBoolean(key, def);
+        } catch (Exception e) { return def; }
     }
 
     static JSONObject fetchJson(String urlStr) throws Exception {

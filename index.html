@@ -734,7 +734,7 @@ async function fetchWeather() {
 }
 
 /* ===== 设置管理 ===== */
-const APP_VERSION = '2.9.2';
+const APP_VERSION = '2.10';
 document.getElementById('appVersion').textContent = 'v' + APP_VERSION;
 
 const DEFAULTS = {
@@ -762,7 +762,19 @@ function loadSettings() {
     if (saved) Object.assign(settings, saved);
   } catch (_) {}
 }
-function saveSettings() { localStorage.setItem('weather_settings', JSON.stringify(settings)); }
+function saveSettings() {
+  localStorage.setItem('weather_settings', JSON.stringify(settings));
+  if (typeof WeatherApp !== 'undefined') {
+    WeatherApp.saveNotificationSettings(JSON.stringify({
+      notifyIntervalOn: settings.notifyIntervalOn,
+      notifyInterval: settings.notifyInterval,
+      notifyMorningOn: settings.notifyMorningOn,
+      notifyMorningTime: settings.notifyMorningTime,
+      notifyEveningOn: settings.notifyEveningOn,
+      notifyEveningTime: settings.notifyEveningTime,
+    }));
+  }
+}
 function applySettingsUI() {
   updateFreqUI();
   updateAlertBtn('notifyMorning', settings.notifyMorningOn, settings.notifyMorningTime);
