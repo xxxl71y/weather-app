@@ -55,11 +55,13 @@ public class MainActivity extends Activity {
         // Start background weather monitoring
         BootReceiver.scheduleAll(this);
 
-        // Request battery optimization exemption
-        requestBatteryExemption();
-
-        // Request auto-start permission (Chinese ROMs)
-        requestAutoStart();
+        // Request battery optimization exemption (first launch only)
+        SharedPreferences prefs = getSharedPreferences("weather", MODE_PRIVATE);
+        if (!prefs.getBoolean("permRequested", false)) {
+            prefs.edit().putBoolean("permRequested", true).apply();
+            requestBatteryExemption();
+            requestAutoStart();
+        }
     }
 
     class AppBridge {
@@ -95,39 +97,20 @@ public class MainActivity extends Activity {
     }
 
     private void requestAutoStart() {
-        try {
-            Intent intent = new Intent();
-            intent.setClassName("com.miui.securitycenter",
-                "com.miui.permcenter.autostart.AutoStartManagementActivity");
-            startActivity(intent);
-        } catch (Exception e1) {
+        String[][] roms = {
+            {"com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"},
+            {"com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"},
+            {"com.coloros.safecenter", "com.coloros.safecenter.permission.startup.StartupAppListActivity"},
+            {"com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"},
+            {"com.samsung.android.lool", "com.samsung.android.sm.ui.battery.BatteryActivity"},
+        };
+        for (String[] rom : roms) {
             try {
                 Intent intent = new Intent();
-                intent.setClassName("com.huawei.systemmanager",
-                    "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity");
+                intent.setClassName(rom[0], rom[1]);
                 startActivity(intent);
-            } catch (Exception e2) {
-                try {
-                    Intent intent = new Intent();
-                    intent.setClassName("com.coloros.safecenter",
-                        "com.coloros.safecenter.permission.startup.StartupAppListActivity");
-                    startActivity(intent);
-                } catch (Exception e3) {
-                    try {
-                        Intent intent = new Intent();
-                        intent.setClassName("com.vivo.permissionmanager",
-                            "com.vivo.permissionmanager.activity.BgStartUpManagerActivity");
-                        startActivity(intent);
-                    } catch (Exception e4) {
-                        try {
-                            Intent intent = new Intent();
-                            intent.setClassName("com.samsung.android.lool",
-                                "com.samsung.android.sm.ui.battery.BatteryActivity");
-                            startActivity(intent);
-                        } catch (Exception ignored) {}
-                    }
-                }
-            }
+                return;
+            } catch (Exception ignored) {}
         }
     }
 
@@ -174,5 +157,14 @@ public class MainActivity extends Activity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (webView != null) {
+            webView.destroy();
+            webView = null;
+        }
+        super.onDestroy();
     }
 }

@@ -24,7 +24,8 @@ public class BootReceiver extends BroadcastReceiver {
         WorkManager.getInstance(ctx).enqueueUniquePeriodicWork(
             "hourly_check", ExistingPeriodicWorkPolicy.KEEP, hourly);
 
-        DailyAlertWorker.scheduleNext(ctx, "today");
-        DailyAlertWorker.scheduleNext(ctx, "tomorrow");
+        NotifySettings ns = NotifySettings.load(ctx);
+        DailyAlertWorker.scheduleNext(ctx, ns, "today");
+        DailyAlertWorker.scheduleNext(ctx, ns, "tomorrow");
     }
 }

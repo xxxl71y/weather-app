@@ -734,7 +734,7 @@ async function fetchWeather() {
 }
 
 /* ===== 设置管理 ===== */
-const APP_VERSION = '2.10';
+const APP_VERSION = '2.10.1';
 document.getElementById('appVersion').textContent = 'v' + APP_VERSION;
 
 const DEFAULTS = {
@@ -904,6 +904,7 @@ function openTimePicker(key) {
 }
 
 function selectTPVal(el) {
+  if (el.classList.contains('active')) return; // already selected
   const col = el.parentElement;
   col.querySelectorAll('.tp-col-item').forEach(d => d.classList.remove('active'));
   el.classList.add('active');

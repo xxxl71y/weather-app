@@ -27,19 +27,19 @@ public class DailyAlertWorker extends Worker {
         String mode = getInputData().getString("mode");
         if (mode == null) mode = "today";
 
-        SharedPreferences prefs = ctx.getSharedPreferences("weather", Context.MODE_PRIVATE);
+        NotifySettings ns = NotifySettings.load(ctx);
 
-        // Check if this alert is enabled
-        String onKey = mode.equals("tomorrow") ? "notifyEveningOn" : "notifyMorningOn";
-        if (!HourlyWeatherWorker.isEnabled(prefs, onKey, true)) {
-            scheduleNext(ctx, mode);
+        boolean enabled = mode.equals("tomorrow") ? ns.eveningOn : ns.morningOn;
+        if (!enabled) {
+            scheduleNext(ctx, ns, mode);
             return Result.success();
         }
 
+        SharedPreferences prefs = ctx.getSharedPreferences("weather", Context.MODE_PRIVATE);
         float lat = prefs.getFloat("lat", Float.NaN);
         float lon = prefs.getFloat("lon", Float.NaN);
         if (Float.isNaN(lat) || Float.isNaN(lon)) {
-            scheduleNext(ctx, mode);
+            scheduleNext(ctx, ns, mode);
             return Result.success();
         }
 
@@ -76,30 +76,20 @@ public class DailyAlertWorker extends Worker {
             Log.e("DailyAlert", "check failed", e);
         }
 
-        scheduleNext(ctx, mode);
+        scheduleNext(ctx, ns, mode);
         return Result.success();
     }
 
-    static void scheduleNext(Context ctx, String mode) {
+    static void scheduleNext(Context ctx, NotifySettings ns, String mode) {
         String workName = mode.equals("tomorrow") ? WORK_NAME_EVENING : WORK_NAME_MORNING;
-        String timeKey = mode.equals("tomorrow") ? "notifyEveningTime" : "notifyMorningTime";
-        int defHour = mode.equals("tomorrow") ? 23 : 8;
-        int defMin = 0;
+        String time = mode.equals("tomorrow") ? ns.eveningTime : ns.morningTime;
 
-        // Read custom time from settings
-        int hour = defHour, min = defMin;
-        SharedPreferences prefs = ctx.getSharedPreferences("weather", Context.MODE_PRIVATE);
+        int hour = 23, min = 0;
+        if (mode.equals("today")) { hour = 8; min = 0; }
         try {
-            String json = prefs.getString("notifySettings", null);
-            if (json != null) {
-                org.json.JSONObject s = new org.json.JSONObject(json);
-                String time = s.optString(timeKey, "");
-                if (!time.isEmpty()) {
-                    String[] parts = time.split(":");
-                    hour = Integer.parseInt(parts[0]);
-                    min = Integer.parseInt(parts[1]);
-                }
-            }
+            String[] parts = time.split(":");
+            hour = Integer.parseInt(parts[0]);
+            min = Integer.parseInt(parts[1]);
         } catch (Exception ignored) {}
 
         Calendar now = Calendar.getInstance();
