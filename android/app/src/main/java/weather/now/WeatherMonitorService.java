@@ -150,7 +150,7 @@ public class WeatherMonitorService extends Service {
                 + "&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,precipitation"
                 + "&forecast_hours=3&timezone=auto";
             JSONObject json = HourlyWeatherWorker.fetchJson(apiUrl);
-            if (json == null) return;
+            if (json == null) return false;
 
             HourlyWeatherWorker.cacheCurrentWeather(json, ctx, lat, lon);
 
@@ -183,8 +183,9 @@ public class WeatherMonitorService extends Service {
             mainHandler.post(() -> updateNotification("天气监测中 · " + getIntervalLabel()));
         } catch (Exception e) {
             Log.e("WeatherMonitor", "check failed", e);
+            return false;
         }
-        return true; // data fetched — caller uses normal interval
+        return true;
     }
 
     private String getIntervalLabel() {
