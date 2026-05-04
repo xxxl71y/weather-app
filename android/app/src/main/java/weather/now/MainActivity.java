@@ -95,6 +95,21 @@ public class MainActivity extends Activity {
                 .putString("weatherCache", json)
                 .apply();
         }
+
+        @JavascriptInterface
+        public void startMonitor() {
+            Intent svc = new Intent(MainActivity.this, WeatherMonitorService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(svc);
+            } else {
+                startService(svc);
+            }
+        }
+
+        @JavascriptInterface
+        public void stopMonitor() {
+            stopService(new Intent(MainActivity.this, WeatherMonitorService.class));
+        }
     }
 
     private void requestBatteryExemption() {

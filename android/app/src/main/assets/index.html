@@ -756,7 +756,7 @@ function loadWeather() {
 }
 
 /* ===== 设置管理 ===== */
-const APP_VERSION = '2.11';
+const APP_VERSION = '2.12';
 document.getElementById('appVersion').textContent = 'v' + APP_VERSION;
 
 const DEFAULTS = {
@@ -855,8 +855,12 @@ document.getElementById('tempUnit').addEventListener('click', e => {
 ['notifyIntervalOn','notifyMorningOn','notifyEveningOn'].forEach(id => {
   document.getElementById(id).addEventListener('change', function() {
     settings[id] = this.checked;
-    if (id === 'notifyIntervalOn') updateFreqUI();
-    else { const prefix = id.replace('On',''); updateAlertBtn(prefix, this.checked, settings[prefix + 'Time']); }
+    if (id === 'notifyIntervalOn') {
+      updateFreqUI();
+      if (typeof WeatherApp !== 'undefined') {
+        this.checked ? WeatherApp.startMonitor() : WeatherApp.stopMonitor();
+      }
+    } else { const prefix = id.replace('On',''); updateAlertBtn(prefix, this.checked, settings[prefix + 'Time']); }
     saveSettings();
   });
 });
