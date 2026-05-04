@@ -6,16 +6,29 @@ android {
     namespace = "weather.now"
     compileSdk = 34
 
+    signingConfigs {
+        create("fixed") {
+            storeFile = file("../weather.keystore")
+            storePassword = "android01"
+            keyAlias = "weather"
+            keyPassword = "android01"
+        }
+    }
+
     defaultConfig {
         applicationId = "weather.now"
         minSdk = 24
         targetSdk = 34
-        versionCode = 33
-        versionName = "2.12.3"
+        versionCode = 34
+        versionName = "2.12.4"
     }
 
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("fixed")
+        }
         release {
+            signingConfig = signingConfigs.getByName("fixed")
             isMinifyEnabled = false
         }
     }
