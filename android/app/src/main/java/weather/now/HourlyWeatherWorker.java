@@ -52,22 +52,31 @@ public class HourlyWeatherWorker extends Worker {
             boolean alert = false;
             StringBuilder desc = new StringBuilder();
 
-            for (int i = 0; i < codes.length() && i < 2; i++) {
+            int alertStart = -1, alertEnd = -1;
+            boolean hasSnow = false;
+            for (int i = 0; i < codes.length() && i < 3; i++) {
                 int code = codes.getInt(i);
                 double p = precip.getDouble(i);
                 int prob = precipProb.getInt(i);
                 String label = weatherLabel(code);
                 if (label != null && (p > 0 || prob > 30)) {
+                    if (alertStart < 0) alertStart = i;
+                    alertEnd = i + 1;
                     if (desc.length() > 0) desc.append("，");
                     desc.append(label);
+                    if (code >= 71 && code <= 77 || code >= 85 && code <= 86) hasSnow = true;
                     alert = true;
                 }
             }
 
             if (alert) {
+                String timeWin = (alertStart == alertEnd - 1)
+                    ? "未来" + alertEnd + "小时内"
+                    : "未来" + (alertStart + 1) + "-" + alertEnd + "小时";
+                String advice = hasSnow ? "注意保暖❄️" : "注意带伞🌂";
                 WeatherNotificationHelper.show(ctx,
-                    "未来1小时天气提醒",
-                    "预计有" + desc + "，注意带伞🌂",
+                    timeWin + "天气提醒",
+                    "预计有" + desc + "，" + advice,
                     1001);
             }
             return Result.success();

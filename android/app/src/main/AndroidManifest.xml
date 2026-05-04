@@ -7,9 +7,6 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
-
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher_standalone"
@@ -35,10 +32,5 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
-        <service
-            android:name=".WeatherMonitorService"
-            android:foregroundServiceType="dataSync"
-            android:exported="false" />
     </application>
 </manifest>

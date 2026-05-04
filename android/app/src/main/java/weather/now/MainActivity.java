@@ -72,6 +72,7 @@ public class MainActivity extends Activity {
                 .edit()
                 .putFloat("lat", (float) lat)
                 .putFloat("lon", (float) lon)
+                .putLong("locTimestamp", System.currentTimeMillis())
                 .apply();
         }
 
@@ -99,22 +100,33 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void startMonitor() {
-            Intent svc = new Intent(MainActivity.this, WeatherMonitorService.class);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(svc);
-            } else {
-                startService(svc);
-            }
+            BootReceiver.scheduleHourlyWorker(MainActivity.this);
         }
 
         @JavascriptInterface
         public void stopMonitor() {
-            stopService(new Intent(MainActivity.this, WeatherMonitorService.class));
+            BootReceiver.cancelHourlyWorker(MainActivity.this);
         }
 
         @JavascriptInterface
         public void setSettingsOpen(boolean open) {
             settingsOpen = open;
+        }
+
+        @JavascriptInterface
+        public String getLocation() {
+            SharedPreferences prefs = getSharedPreferences("weather", MODE_PRIVATE);
+            float lat = prefs.getFloat("lat", Float.NaN);
+            float lon = prefs.getFloat("lon", Float.NaN);
+            if (Float.isNaN(lat) || Float.isNaN(lon)) return "";
+            long ts = prefs.getLong("locTimestamp", 0);
+            try {
+                org.json.JSONObject j = new org.json.JSONObject();
+                j.put("lat", lat);
+                j.put("lon", lon);
+                j.put("ts", ts);
+                return j.toString();
+            } catch (Exception e) { return ""; }
         }
     }
 

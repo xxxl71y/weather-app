@@ -3,7 +3,10 @@ package weather.now;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import java.util.concurrent.TimeUnit;
 
 public class BootReceiver extends BroadcastReceiver {
     @Override
@@ -13,16 +16,23 @@ public class BootReceiver extends BroadcastReceiver {
     }
 
     static void scheduleAll(Context ctx) {
-        // Start foreground monitoring service
-        Intent svc = new Intent(ctx, WeatherMonitorService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ctx.startForegroundService(svc);
-        } else {
-            ctx.startService(svc);
-        }
-
+        scheduleHourlyWorker(ctx);
         NotifySettings ns = NotifySettings.load(ctx);
         DailyAlertWorker.scheduleNext(ctx, ns, "today");
         DailyAlertWorker.scheduleNext(ctx, ns, "tomorrow");
+    }
+
+    static void scheduleHourlyWorker(Context ctx) {
+        NotifySettings ns = NotifySettings.load(ctx);
+        int intervalMin = ns.intervalMin > 0 ? ns.intervalMin : 60;
+        PeriodicWorkRequest hourly = new PeriodicWorkRequest.Builder(HourlyWeatherWorker.class,
+                intervalMin, TimeUnit.MINUTES)
+            .build();
+        WorkManager.getInstance(ctx).enqueueUniquePeriodicWork(
+            "hourly_check", ExistingPeriodicWorkPolicy.REPLACE, hourly);
+    }
+
+    static void cancelHourlyWorker(Context ctx) {
+        WorkManager.getInstance(ctx).cancelUniqueWork("hourly_check");
     }
 }

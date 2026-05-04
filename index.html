@@ -684,26 +684,42 @@ async function fetchWeatherFresh(showLoader) {
 
   let lat, lon, locName = '', locDetail = '', usingGPS = false;
 
+  // 1. Try cached location first (instant, no GPS wait)
   try {
-    const pos = await new Promise((resolve, reject) => {
-      if (!navigator.geolocation) return reject(new Error());
-      navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000, enableHighAccuracy: true });
-    });
-    lat = pos.coords.latitude;
-    lon = pos.coords.longitude;
-    if (typeof WeatherApp !== 'undefined') WeatherApp.saveLocation(lat, lon);
-    usingGPS = true;
-  } catch (e) {
-    try {
-      const ipRes = await fetch('https://ipapi.co/json/');
-      if (ipRes.ok) {
-        const ipData = await ipRes.json();
-        lat = ipData.latitude;
-        lon = ipData.longitude;
-        if (typeof WeatherApp !== 'undefined') WeatherApp.saveLocation(lat, lon);
-        locName = ipData.city || ipData.region || '';
+    if (typeof WeatherApp !== 'undefined') {
+      const raw = WeatherApp.getLocation();
+      if (raw) {
+        const loc = JSON.parse(raw);
+        if (loc.lat != null && loc.lon != null && (Date.now() - loc.ts < 3600000)) {
+          lat = loc.lat; lon = loc.lon; usingGPS = true;
+        }
       }
-    } catch (_) {}
+    }
+  } catch (_) {}
+
+  // 2. GPS if no cached location or stale
+  if (lat == null || lon == null) {
+    try {
+      const pos = await new Promise((resolve, reject) => {
+        if (!navigator.geolocation) return reject(new Error());
+        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000, enableHighAccuracy: true });
+      });
+      lat = pos.coords.latitude;
+      lon = pos.coords.longitude;
+      if (typeof WeatherApp !== 'undefined') WeatherApp.saveLocation(lat, lon);
+      usingGPS = true;
+    } catch (e) {
+      try {
+        const ipRes = await fetch('https://ipapi.co/json/');
+        if (ipRes.ok) {
+          const ipData = await ipRes.json();
+          lat = ipData.latitude;
+          lon = ipData.longitude;
+          if (typeof WeatherApp !== 'undefined') WeatherApp.saveLocation(lat, lon);
+          locName = ipData.city || ipData.region || '';
+        }
+      } catch (_) {}
+    }
   }
 
   if (lat == null || lon == null) {
@@ -756,7 +772,7 @@ function loadWeather() {
 }
 
 /* ===== 设置管理 ===== */
-const APP_VERSION = '2.12.2';
+const APP_VERSION = '2.13';
 document.getElementById('appVersion').textContent = 'v' + APP_VERSION;
 
 const DEFAULTS = {
