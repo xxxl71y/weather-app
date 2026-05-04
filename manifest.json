@@ -1,7 +1,7 @@
 {
-  "short_name": "天气",
-  "name": "Weather Now",
-  "description": "实时天气查询",
+  "short_name": "天气酱",
+  "name": "天气酱",
+  "description": "实时天气查询，雨雪预测推送",
   "start_url": "/weather-app/",
   "display": "standalone",
   "orientation": "portrait",

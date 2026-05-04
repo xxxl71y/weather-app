@@ -15,13 +15,13 @@
 | 🎨 **6 种动态主题** | 晴☀️ 云⛅ 雨🌧️ 雪❄️ 雷⛈️ 雾🌫️，天气即所见 |
 | ✨ **粒子动画** | 雨滴滑落、雪花飘舞，实时渲染在屏幕上 |
 | 💯 **永久免费** | 无广告、无内购、无 API Key、不收集隐私 |
-| 📱 **全平台** | 浏览器即开即用 · Android APK 独立安装 |
+| 📱 **多端可用** | 浏览器即开即用 · Android APK 独立安装 |
 
 ---
 
 ### 📦 下载
 
-[**Android APK**](https://github.com/xxxl71y/weather-app/releases) — 独立应用，冷启动即开，后台常驻通知
+[**Android APK**](https://github.com/xxxl71y/weather-app/releases) — 独立应用，冷启动即开，雨雪预测推送
 
 ---
 
