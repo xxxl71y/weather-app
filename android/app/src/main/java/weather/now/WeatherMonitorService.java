@@ -8,32 +8,49 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.util.Log;
+import androidx.work.WorkManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class WeatherMonitorService extends Service {
     private static final String CHANNEL_ID = "weather_monitor";
     private static final int NOTIFY_ID = 3001;
-    private static final long RETRY_DELAY = 60_000; // 1 minute retry if no location
+    private static final long RETRY_DELAY = 60_000;
 
-    private Handler handler;
+    private Handler bgHandler;
+    private Handler mainHandler;
     private Runnable checkRunnable;
-    private boolean running;
+    private volatile boolean running;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        handler = new Handler(getMainLooper());
+        // Background thread for HTTP (avoid ANR)
+        HandlerThread ht = new HandlerThread("WeatherMonitor");
+        ht.start();
+        bgHandler = new Handler(ht.getLooper());
+        mainHandler = new Handler(getMainLooper());
         createChannel();
+        // Also create alert channel (may not exist if service starts before activity)
+        WeatherNotificationHelper.createChannel(this);
+        // Cancel old HourlyWeatherWorker periodic task from pre-v2.12 versions
+        try { WorkManager.getInstance(this).cancelUniqueWork("hourly_check"); } catch (Exception ignored) {}
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        startForeground(NOTIFY_ID, buildNotification("天气监测已启动"));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(NOTIFY_ID, buildNotification("天气监测已启动"),
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+        } else {
+            startForeground(NOTIFY_ID, buildNotification("天气监测已启动"));
+        }
         startMonitoring();
         return START_STICKY;
     }
@@ -41,6 +58,7 @@ public class WeatherMonitorService extends Service {
     @Override
     public void onDestroy() {
         stopMonitoring();
+        bgHandler.getLooper().quit();
         stopForeground(STOP_FOREGROUND_REMOVE);
         super.onDestroy();
     }
@@ -88,22 +106,22 @@ public class WeatherMonitorService extends Service {
             public void run() {
                 if (!running) return;
                 doCheck();
-                // Schedule next check
+                if (!running) return;
                 long interval = getInterval();
                 if (interval > 0) {
-                    handler.postDelayed(this, interval);
+                    bgHandler.postDelayed(this, interval);
                 } else {
-                    stopSelf();
+                    mainHandler.post(() -> stopSelf());
                 }
             }
         };
-        handler.post(checkRunnable);
+        bgHandler.post(checkRunnable);
     }
 
     private void stopMonitoring() {
         running = false;
         if (checkRunnable != null) {
-            handler.removeCallbacks(checkRunnable);
+            bgHandler.removeCallbacks(checkRunnable);
             checkRunnable = null;
         }
     }
@@ -119,9 +137,10 @@ public class WeatherMonitorService extends Service {
         SharedPreferences prefs = ctx.getSharedPreferences("weather", Context.MODE_PRIVATE);
         float lat = prefs.getFloat("lat", Float.NaN);
         float lon = prefs.getFloat("lon", Float.NaN);
+
         if (Float.isNaN(lat) || Float.isNaN(lon)) {
-            // Retry after delay
-            handler.postDelayed(checkRunnable, RETRY_DELAY);
+            // Retry after delay — next cycle handles it
+            if (running) bgHandler.postDelayed(checkRunnable, RETRY_DELAY);
             return;
         }
 
@@ -134,10 +153,8 @@ public class WeatherMonitorService extends Service {
             JSONObject json = HourlyWeatherWorker.fetchJson(apiUrl);
             if (json == null) return;
 
-            // Cache weather for WebView
             HourlyWeatherWorker.cacheCurrentWeather(json, ctx, lat, lon);
 
-            // Check for rain/snow in next hours
             JSONObject hourly = json.getJSONObject("hourly");
             JSONArray codes = hourly.getJSONArray("weather_code");
             JSONArray precip = hourly.getJSONArray("precipitation");
@@ -164,8 +181,7 @@ public class WeatherMonitorService extends Service {
                     1001);
             }
 
-            // Update notification text
-            updateNotification("天气监测中 · " + getIntervalLabel());
+            mainHandler.post(() -> updateNotification("天气监测中 · " + getIntervalLabel()));
         } catch (Exception e) {
             Log.e("WeatherMonitor", "check failed", e);
         }

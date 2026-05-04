@@ -756,7 +756,7 @@ function loadWeather() {
 }
 
 /* ===== 设置管理 ===== */
-const APP_VERSION = '2.12';
+const APP_VERSION = '2.12.1';
 document.getElementById('appVersion').textContent = 'v' + APP_VERSION;
 
 const DEFAULTS = {
@@ -979,10 +979,12 @@ function startAutoRefresh() {
 function stopAutoRefresh() { if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; } }
 
 loadSettings();
+saveSettings(); // push initial settings to Android bridge
 
 /* ===== 主流程 ===== */
 loadWeather();
 if (settings.autoRefresh) startAutoRefresh();
+if (settings.notifyIntervalOn && typeof WeatherApp !== 'undefined') WeatherApp.startMonitor();
 
 // PWA: 注册 Service Worker
 if ('serviceWorker' in navigator) {
