@@ -19,8 +19,8 @@ android {
         applicationId = "weather.now"
         minSdk = 24
         targetSdk = 34
-        versionCode = 35
-        versionName = "2.13"
+        versionCode = 36
+        versionName = "2.13.1"
     }
 
     buildTypes {

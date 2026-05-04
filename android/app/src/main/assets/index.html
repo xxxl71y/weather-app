@@ -474,7 +474,7 @@
       <div class="setting-row">
         <div>
           <div class="setting-label">自动刷新</div>
-          <div class="setting-hint">保持天气数据更新</div>
+          <div class="setting-hint">前台每5分钟自动刷新</div>
         </div>
         <label class="toggle">
           <input type="checkbox" id="autoRefresh" checked>
@@ -992,7 +992,7 @@ function updateTempDisplay() {
 
 function startAutoRefresh() {
   stopAutoRefresh();
-  refreshTimer = setInterval(() => fetchWeatherFresh(false), 30 * 60 * 1000);
+  refreshTimer = setInterval(() => fetchWeatherFresh(false), 5 * 60 * 1000);
 }
 function stopAutoRefresh() { if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; } }
 
