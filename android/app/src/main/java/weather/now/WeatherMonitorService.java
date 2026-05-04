@@ -69,9 +69,10 @@ public class WeatherMonitorService extends Service {
     private void createChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel ch = new NotificationChannel(
-                CHANNEL_ID, "天气监测", NotificationManager.IMPORTANCE_LOW);
+                CHANNEL_ID, "天气监测", NotificationManager.IMPORTANCE_MIN);
             ch.setDescription("后台天气监测服务");
             ch.setShowBadge(false);
+            ch.setSound(null, null);
             getSystemService(NotificationManager.class).createNotificationChannel(ch);
         }
     }
@@ -93,8 +94,8 @@ public class WeatherMonitorService extends Service {
             .setContentTitle("天气酱")
             .setContentText(text)
             .setContentIntent(pi)
-            .setOngoing(true)
-            .setPriority(Notification.PRIORITY_LOW)
+            .setOngoing(false)
+            .setPriority(Notification.PRIORITY_MIN)
             .build();
     }
 
@@ -105,9 +106,9 @@ public class WeatherMonitorService extends Service {
             @Override
             public void run() {
                 if (!running) return;
-                doCheck();
+                boolean ok = doCheck();
                 if (!running) return;
-                long interval = getInterval();
+                long interval = ok ? getInterval() : RETRY_DELAY;
                 if (interval > 0) {
                     bgHandler.postDelayed(this, interval);
                 } else {
@@ -132,16 +133,14 @@ public class WeatherMonitorService extends Service {
         return ns.intervalMin * 60_000L;
     }
 
-    private void doCheck() {
+    private boolean doCheck() {
         Context ctx = getApplicationContext();
         SharedPreferences prefs = ctx.getSharedPreferences("weather", Context.MODE_PRIVATE);
         float lat = prefs.getFloat("lat", Float.NaN);
         float lon = prefs.getFloat("lon", Float.NaN);
 
         if (Float.isNaN(lat) || Float.isNaN(lon)) {
-            // Retry after delay — next cycle handles it
-            if (running) bgHandler.postDelayed(checkRunnable, RETRY_DELAY);
-            return;
+            return false; // no data — caller uses retry delay
         }
 
         try {
@@ -185,6 +184,7 @@ public class WeatherMonitorService extends Service {
         } catch (Exception e) {
             Log.e("WeatherMonitor", "check failed", e);
         }
+        return true; // data fetched — caller uses normal interval
     }
 
     private String getIntervalLabel() {

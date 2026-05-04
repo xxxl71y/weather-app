@@ -22,6 +22,7 @@ public class MainActivity extends Activity {
     private static final int PERM_REQUEST = 100;
     private WebView webView;
     private boolean permissionsReady = false;
+    private boolean settingsOpen = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,6 +111,11 @@ public class MainActivity extends Activity {
         public void stopMonitor() {
             stopService(new Intent(MainActivity.this, WeatherMonitorService.class));
         }
+
+        @JavascriptInterface
+        public void setSettingsOpen(boolean open) {
+            settingsOpen = open;
+        }
     }
 
     private void requestBatteryExemption() {
@@ -181,7 +187,9 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (webView.canGoBack()) {
+        if (settingsOpen) {
+            webView.loadUrl("javascript:toggleSettings()");
+        } else if (webView.canGoBack()) {
             webView.goBack();
         } else {
             super.onBackPressed();

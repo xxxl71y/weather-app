@@ -756,7 +756,7 @@ function loadWeather() {
 }
 
 /* ===== 设置管理 ===== */
-const APP_VERSION = '2.12.1';
+const APP_VERSION = '2.12.2';
 document.getElementById('appVersion').textContent = 'v' + APP_VERSION;
 
 const DEFAULTS = {
@@ -832,11 +832,13 @@ function toggleSettings() {
     weather.style.display = '';
     btn.style.display = '';
     saveSettings();
+    if (typeof WeatherApp !== 'undefined') WeatherApp.setSettingsOpen(false);
   } else {
     applySettingsUI();
     weather.style.display = 'none';
     panel.classList.add('show');
     btn.style.display = 'none';
+    if (typeof WeatherApp !== 'undefined') WeatherApp.setSettingsOpen(true);
   }
 }
 
@@ -984,7 +986,9 @@ saveSettings(); // push initial settings to Android bridge
 /* ===== 主流程 ===== */
 loadWeather();
 if (settings.autoRefresh) startAutoRefresh();
-if (settings.notifyIntervalOn && typeof WeatherApp !== 'undefined') WeatherApp.startMonitor();
+if (typeof WeatherApp !== 'undefined') {
+  settings.notifyIntervalOn ? WeatherApp.startMonitor() : WeatherApp.stopMonitor();
+}
 
 // PWA: 注册 Service Worker
 if ('serviceWorker' in navigator) {
