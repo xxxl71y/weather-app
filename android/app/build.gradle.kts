@@ -19,8 +19,8 @@ android {
         applicationId = "weather.now"
         minSdk = 24
         targetSdk = 34
-        versionCode = 37
-        versionName = "2.13.2"
+        versionCode = 38
+        versionName = "3.0"
     }
 
     buildTypes {
@@ -38,6 +38,29 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
+
+// Inject APP_VERSION into index.html and sync assets
+val syncAssets = tasks.register("syncAssets") {
+    doLast {
+        val version = android.defaultConfig.versionName
+        val assetDir = file("src/main/assets")
+        assetDir.mkdirs()
+
+        // Copy index.html with version injected
+        val html = file("../../index.html").readText()
+            .replace("__APP_VERSION__", version)
+        file("$assetDir/index.html").writeText(html)
+
+        // Copy src/ modules
+        val srcDir = file("../../src")
+        val srcAssetDir = file("$assetDir/src")
+        srcAssetDir.mkdirs()
+        srcDir.listFiles()?.forEach { f ->
+            file("$srcAssetDir/${f.name}").writeText(f.readText())
+        }
+    }
+}
+tasks.named("preBuild") { dependsOn(syncAssets) }
 
 dependencies {
     implementation("androidx.browser:browser:1.7.0")
