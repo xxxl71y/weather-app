@@ -46,13 +46,6 @@ val syncAssets = tasks.register("syncAssets") {
         val assetDir = file("src/main/assets")
         assetDir.mkdirs()
 
-        // Copy index.html with version injected
-        val html = file("../../index.html").readText()
-        val srcHtml = file("../../src/settings.js").readText()
-            .replace(Regex("const APP_VERSION = '[^']*'"), "const APP_VERSION = '$version'")
-        file("$srcAssetDir/settings.js").writeText(srcHtml)
-        file("$assetDir/index.html").writeText(html)
-
         // Copy src/ modules
         val srcDir = file("../../src")
         val srcAssetDir = file("$assetDir/src")
@@ -60,6 +53,15 @@ val syncAssets = tasks.register("syncAssets") {
         srcDir.listFiles()?.forEach { f ->
             file("$srcAssetDir/${f.name}").writeText(f.readText())
         }
+
+        // Overwrite settings.js with version injected
+        val srcHtml = file("../../src/settings.js").readText()
+            .replace(Regex("const APP_VERSION = '[^']*'"), "const APP_VERSION = '$version'")
+        file("$srcAssetDir/settings.js").writeText(srcHtml)
+
+        // Copy index.html
+        val html = file("../../index.html").readText()
+        file("$assetDir/index.html").writeText(html)
     }
 }
 tasks.named("preBuild") { dependsOn(syncAssets) }
