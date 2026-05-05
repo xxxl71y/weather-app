@@ -105,7 +105,7 @@ async function fetchWeatherFresh(showLoader) {
 function loadWeather() {
   const cached = loadCachedWeather();
   if (cached) displayWeatherData(cached);
-  fetchWeatherFresh(!cached);
+  if (settings.autoRefresh) fetchWeatherFresh(!cached);
 }
 /* ===== Bootstrap ===== */
 loadSettings();
@@ -113,7 +113,6 @@ saveSettings();
 
 /* ===== 主流程 ===== */
 loadWeather();
-if (settings.autoRefresh) startAutoRefresh();
 if (typeof WeatherApp !== 'undefined') {
   settings.notifyIntervalOn ? WeatherApp.startMonitor() : WeatherApp.stopMonitor();
 }

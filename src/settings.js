@@ -19,7 +19,6 @@ const FREQ_OPTS = [
 ];
 function freqLabel(v) { const o = FREQ_OPTS.find(f => f.val === v); return o ? o.label : '1 小时'; }
 let settings = { ...DEFAULTS };
-let refreshTimer = null;
 
 function loadSettings() {
   try {
@@ -51,8 +50,6 @@ function applySettingsUI() {
   seg.querySelectorAll('button').forEach(b => {
     b.classList.toggle('active', b.dataset.val === settings.tempUnit);
   });
-  if (settings.autoRefresh) startAutoRefresh();
-  else stopAutoRefresh();
 }
 function updateFreqUI() {
   document.getElementById('notifyIntervalOn').checked = settings.notifyIntervalOn;
@@ -114,7 +111,6 @@ document.getElementById('tempUnit').addEventListener('click', e => {
 document.getElementById('autoRefresh').addEventListener('change', function() {
   settings.autoRefresh = this.checked;
   saveSettings();
-  this.checked ? startAutoRefresh() : stopAutoRefresh();
 });
 
 let lastCelsius = null;
@@ -126,9 +122,3 @@ function updateTempDisplay() {
   const unit = settings.tempUnit === 'fahrenheit' ? '°F' : '°C';
   tempEl.innerHTML = val + '<span class="temp-unit">' + unit + '</span>';
 }
-
-function startAutoRefresh() {
-  stopAutoRefresh();
-  refreshTimer = setInterval(() => fetchWeatherFresh(false), 5 * 60 * 1000);
-}
-function stopAutoRefresh() { if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; } }
