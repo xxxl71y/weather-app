@@ -48,7 +48,9 @@ val syncAssets = tasks.register("syncAssets") {
 
         // Copy index.html with version injected
         val html = file("../../index.html").readText()
-            .replace("__APP_VERSION__", version)
+        val srcHtml = file("../../src/settings.js").readText()
+            .replace(Regex("const APP_VERSION = '[^']*'"), "const APP_VERSION = '$version'")
+        file("$srcAssetDir/settings.js").writeText(srcHtml)
         file("$assetDir/index.html").writeText(html)
 
         // Copy src/ modules

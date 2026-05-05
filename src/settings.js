@@ -1,5 +1,5 @@
 /* ===== 设置管理 ===== */
-const APP_VERSION = '__APP_VERSION__';
+const APP_VERSION = '3.0';
 document.getElementById('appVersion').textContent = 'v' + APP_VERSION;
 
 const DEFAULTS = {
