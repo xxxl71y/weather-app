@@ -42,7 +42,7 @@ android {
 // Inject APP_VERSION into index.html and sync assets
 val syncAssets = tasks.register("syncAssets") {
     doLast {
-        val version = android.defaultConfig.versionName
+        val version = android.defaultConfig.versionName ?: "0.0"
         val assetDir = file("src/main/assets")
         assetDir.mkdirs()
 
